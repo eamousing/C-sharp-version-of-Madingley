@@ -51,7 +51,7 @@ namespace Madingley
 
 
         /// <summary>
-        /// Run ecological processes that operate on stocks within a single grid cell
+        /// Run ecological processes that operate on stocks within a single terrestrial grid cell
         /// </summary>
         ///<param name="gridCellStocks">The stocks in the current grid cell</param>
         ///<param name="actingStock">The acting stock</param>
@@ -70,7 +70,7 @@ namespace Madingley
         ///<param name="outputDetail">The level of detail to use in outputs</param>
         ///<param name="specificLocations">Whether to run the model for specific locations</param>
         ///<param name="impactCell">Whether this cell should have human impacts applied</param>
-        public void RunWithinCellEcology(MadingleyModelInitialisation madingleyInitialisation, GridCellStockHandler gridCellStocks, int[] actingStock, SortedList<string, double[]> cellEnvironment,
+        public void RunWithinCellEcologyTerrestrial(MadingleyModelInitialisation madingleyInitialisation, GridCellStockHandler gridCellStocks, int[] actingStock, SortedList<string, double[]> cellEnvironment,
             SortedList<string, string> environmentalDataUnits, Tuple<string, double, double> humanNPPScenario, FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions, 
             uint currentTimeStep, uint burninSteps, uint impactSteps,uint recoverySteps, uint instantStep, uint numInstantSteps, string globalModelTimeStepUnit, 
             Boolean trackProcesses, ProcessTracker tracker, FunctionalGroupTracker functionalTracker,
@@ -80,12 +80,12 @@ namespace Madingley
             if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
             {
                 // Run the autotroph processor
-                MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyInitialisation, madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"],
-                    environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, functionalTracker, globalTracker,
-                    outputDetail, specificLocations, currentMonth, nsfPhyto);
+                //MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyInitialisation, madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"],
+                //    environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, functionalTracker, globalTracker,
+                //    outputDetail, specificLocations, currentMonth, nsfPhyto);
 
                 // Run the Nutrient-Plankton model
-                NPZModel.RunNPZModel();
+                //NPZModel.RunNPZModel(cellEnvironment, currentMonth);
 
             }
             else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
@@ -123,6 +123,28 @@ namespace Madingley
             {
                 Debug.Fail("Stock must be classified as belonging to either the marine or terrestrial realm");
             }
+        }
+
+        /// <summary>
+        /// Run ecological processes that operate on stocks within a single marine grid cell
+        /// </summary>
+        ///<param name="cellEnvironment">The stocks in the current grid cell</param>
+        ///<param name="currentMonth">The current model month</param>
+        public double[] RunWithinCellEcologyMarine(SortedList<string, double[]> cellEnvironment, uint currentMonth)
+        {
+            {
+                // Run the Nutrient-Plankton model
+                return NPZModel.RunNPZModel(cellEnvironment, currentMonth);
+            }
+        }
+
+        /// <summary>
+        /// Update marine stocks after running the NPZ model
+        /// </summary>
+        /// 
+        public void UpdateMarineStocks(double StockPlanktonBiomass, int[] actingStock, GridCellStockHandler gridCellStocks)
+        {
+            gridCellStocks[actingStock].TotalBiomass += StockPlanktonBiomass;
         }
     }
 }

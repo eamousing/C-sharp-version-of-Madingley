@@ -10,7 +10,7 @@ Leftmost Longitude,-47
 Rightmost Longitude,-46
 Grid Cell Size,1
 Read State,
-Specific Location File,specificlocations.csv
+Specific Location File,SpecificLocations.csv
 Plankton size threshold,1
 Draw Randomly,yes
 Extinction Threshold,1

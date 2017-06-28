@@ -1135,6 +1135,9 @@ namespace Madingley
             GlobalDiagnosticVariables["NumberOfCohortsCombined"] = singleThreadDiagnostics.Combinations;
         }
 
+        
+
+
         /// <summary>
         /// Run ecological processes for stocks in a specified grid cell
         /// </summary>
@@ -1159,24 +1162,47 @@ namespace Madingley
             int[] AutotrophStockFunctionalGroups = StockFunctionalGroupDefinitions.GetFunctionalGroupIndex("Heterotroph/Autotroph", "Autotroph", false).
                 ToArray();
 
+            double[] PlanktonBiomasses;
+
+            // Run the Plankton model
+            PlanktonBiomasses = MadingleyEcologyStock.RunWithinCellEcologyMarine(EcosystemModelGrid.GetCellEnvironment(latCellIndex, lonCellIndex), CurrentMonth);
+
             // Loop over autotroph functional groups
             foreach (int FunctionalGroup in AutotrophStockFunctionalGroups)
             {
-                for (int ll = 0; ll < workingGridCellStocks[FunctionalGroup].Count; ll++)
+                if (FunctionalGroup < 2)
                 {
-                    // Get the position of the acting stock
-                    ActingStock[0] = FunctionalGroup;
-                    ActingStock[1] = ll;
+                    for (int ll = 0; ll < workingGridCellStocks[FunctionalGroup].Count; ll++)
+                    {
+                        // Get the position of the acting stock
+                        ActingStock[0] = FunctionalGroup;
+                        ActingStock[1] = ll;
 
-                    // Run stock ecology
-                    MadingleyEcologyStock.RunWithinCellEcology(initialisation, workingGridCellStocks, ActingStock, EcosystemModelGrid.GetCellEnvironment(
-                        latCellIndex, lonCellIndex), EnvironmentalDataUnits, _HumanNPPScenario, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
-                        CurrentTimeStep, NumBurninSteps, NumImpactSteps, initialisation.RecoveryTimeSteps, initialisation.InstantaneousTimeStep, initialisation.NumInstantaneousTimeStep, _GlobalModelTimeStepUnit,
-                        ProcessTrackers[cellIndex].TrackProcesses, ProcessTrackers[cellIndex], FGTracker, TrackGlobalProcesses, CurrentMonth,
-                        InitialisationFileStrings["OutputDetail"], SpecificLocations,
-                        ((initialisation.ImpactCellIndices.Contains((uint)cellIndex) || (initialisation.ImpactAll))), initialisation.NSFPhyto);
+                        double currentPlanktonStock = PlanktonBiomasses[FunctionalGroup];
 
+                        // Update biomasses
+                        MadingleyEcologyStock.UpdateMarineStocks(currentPlanktonStock, ActingStock, workingGridCellStocks);
+                    }
                 }
+                else
+                {
+                    for (int ll = 0; ll < workingGridCellStocks[FunctionalGroup].Count; ll++)
+                    {
+                        // Get the position of the acting stock
+                        ActingStock[0] = FunctionalGroup;
+                        ActingStock[1] = ll;
+
+                        // Run stock ecology
+                        MadingleyEcologyStock.RunWithinCellEcologyTerrestrial(initialisation, workingGridCellStocks, ActingStock, EcosystemModelGrid.GetCellEnvironment(
+                            latCellIndex, lonCellIndex), EnvironmentalDataUnits, _HumanNPPScenario, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                            CurrentTimeStep, NumBurninSteps, NumImpactSteps, initialisation.RecoveryTimeSteps, initialisation.InstantaneousTimeStep, initialisation.NumInstantaneousTimeStep, _GlobalModelTimeStepUnit,
+                            ProcessTrackers[cellIndex].TrackProcesses, ProcessTrackers[cellIndex], FGTracker, TrackGlobalProcesses, CurrentMonth,
+                            InitialisationFileStrings["OutputDetail"], SpecificLocations,
+                            ((initialisation.ImpactCellIndices.Contains((uint)cellIndex) || (initialisation.ImpactAll))), initialisation.NSFPhyto);
+
+                    }
+                }
+                
             }
 
         }

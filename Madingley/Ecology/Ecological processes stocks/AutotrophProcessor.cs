@@ -124,14 +124,16 @@ namespace Madingley
                         NPP *= 12 * 86400;
                     }
 
-                    // Convert to g/cell/month
+                    // Convert to g/cell/month (<- this cannot be right)
+                    // must be gC/km2/day
                     NPP *= _MsqToKmSqConversion;
 
-                    // Multiply by cell area to get g/cell/day
+                    // Multiply by cell area to get gC/cell/day
                     NPP *= cellEnvironment["Cell Area"][0];
 
                     // Convert to g wet matter, assuming carbon content of phytoplankton is 10% of wet matter
                     NPP *= _PhytoplanktonConversionRatio;
+                    double NPPTest = NPP;
 
                     // Finally convert to g/cell/month and add to the stock totalbiomass
                     NPP *= Utilities.ConvertTimeUnits(GlobalModelTimeStepUnit, "day");
