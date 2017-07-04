@@ -4,3 +4,4 @@ Environmental Data File,EnvironmentalDataLayers.csv
 Cohort Functional Group Definitions File,CohortFunctionalGroupDefinitions.csv
 Stock Functional Group Definitions File,StockFunctionalGroupDefinitions.csv
 Ecological parameters file,EcologicalParameters.csv
+NPZ model parameters file,NutrientsPlanktonModelParameters.csv

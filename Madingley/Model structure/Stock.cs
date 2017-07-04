@@ -55,6 +55,13 @@ namespace Madingley
         }
 
         /// <summary>
+        /// Set and get the biomass from the NPZ model
+        /// </summary>
+        private double[] _BiomassFromNPZ;
+        public double[] BiomassFromNPZ { get { return _BiomassFromNPZ; } }
+        
+
+        /// <summary>
         /// Constructor for stock class. Assigns stock starting properties
         /// </summary>
         /// <param name="functionalGroupIndex">The functional group index of the stock being generated</param>
@@ -81,7 +88,6 @@ namespace Madingley
             _IndividualBodyMass = individualMass;
             _TotalBiomass = initialTotalBiomass;
             _StockName = stockName;
-
         }
 
         public Stock(Stock s)

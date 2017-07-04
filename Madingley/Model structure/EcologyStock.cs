@@ -14,9 +14,14 @@ namespace Madingley
     class EcologyStock
     {
         /// <summary>
+        /// An instance of the nutrient plankton model
+        /// </summary>
+        NutrientsPlanktonModel NPZModel;
+
+        /// <summary>
         /// An instance of the Autotroph Processor for this model
         /// </summary>
-        AutotrophProcessor MarineNPPtoAutotrophStock;
+        //AutotrophProcessor MarineNPPtoAutotrophStock;
 
         /// <summary>
         /// An instance of the plant model class
@@ -32,8 +37,11 @@ namespace Madingley
 
         public void InitializeEcology()
         {
+            // Initiate the NPZ model
+            NPZModel = new NutrientsPlanktonModel();
+
             //Initialize the autotrophprocessor
-            MarineNPPtoAutotrophStock = new AutotrophProcessor();
+            //MarineNPPtoAutotrophStock = new AutotrophProcessor();
 
             // Initialise the plant model
             DynamicPlantModel = new RevisedTerrestrialPlantModel();
@@ -43,6 +51,19 @@ namespace Madingley
 
         }
 
+        /// <summary>
+        /// Run the NPZ model in a particular grid cell
+        /// </summary>
+        /// <param name="cellEnvironment"></param>
+        /// <param name="currentMonth"></param>
+        /// <param name="stockDefinitions"></param>
+        /// <param name="gridCellStocks"></param>
+        /// <returns></returns>
+        public double[] RunWithinCellNPZModel(SortedList<string, double[]> cellEnvironment, uint currentMonth, GridCellStockHandler gridCellStocks)
+        {
+            // Run the NPZ model
+            return NPZModel.RunNPZModel(cellEnvironment, currentMonth);
+        }
 
         /// <summary>
         /// Run ecological processes that operate on stocks within a single grid cell
@@ -69,13 +90,18 @@ namespace Madingley
             FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions, 
             uint currentTimeStep, uint burninSteps, uint impactSteps,uint recoverySteps, uint instantStep, uint numInstantSteps, string globalModelTimeStepUnit, Boolean trackProcesses, 
             ProcessTracker tracker, FunctionalGroupTracker functionalTracker, GlobalProcessTracker globalTracker, uint currentMonth, 
-            string outputDetail, bool specificLocations, Boolean impactCell)
+            string outputDetail, bool specificLocations, Boolean impactCell, double currentPlanktonStock)
         {
             if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
             {
+                // Update biomasses of marine stocks after running the NPZ model
+                UpdateMarineStocks(currentPlanktonStock, actingStock, gridCellStocks);
+                
                 // Run the autotroph processor
-                MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
-                    environmentalDataUnits["OceanNPP"], currentTimeStep,globalModelTimeStepUnit,tracker, functionalTracker, globalTracker ,outputDetail,specificLocations,currentMonth);
+                //MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
+                //    environmentalDataUnits["OceanNPP"], currentTimeStep,globalModelTimeStepUnit,tracker, functionalTracker, globalTracker ,outputDetail,specificLocations,currentMonth);
+
+                
             }
             else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
             {
@@ -103,6 +129,17 @@ namespace Madingley
             {
                 Debug.Fail("Stock must be classified as belonging to either the marine or terrestrial realm");
             }
+        }
+
+        /// <summary>
+        /// Updates marine stock biomasses
+        /// </summary>
+        /// <param name="StockPlanktonBiomass"></param>
+        /// <param name="actingStock"></param>
+        /// <param name="gridCellStocks"></param>
+        public void UpdateMarineStocks(double StockPlanktonBiomass, int[] actingStock, GridCellStockHandler gridCellStocks)
+        {
+            gridCellStocks[actingStock].TotalBiomass += StockPlanktonBiomass;
         }
     }
 }

@@ -1159,6 +1159,12 @@ namespace Madingley
             int[] AutotrophStockFunctionalGroups = StockFunctionalGroupDefinitions.GetFunctionalGroupIndex("Heterotroph/Autotroph", "Autotroph", false).
                 ToArray();
 
+            double[] PlanktonBiomasses;
+
+            // Run the nutrient-plankton model
+            PlanktonBiomasses = MadingleyEcologyStock.RunWithinCellNPZModel(EcosystemModelGrid.GetCellEnvironment(latCellIndex, lonCellIndex), 
+                CurrentMonth, workingGridCellStocks);
+
             // Loop over autotroph functional groups
             foreach (int FunctionalGroup in AutotrophStockFunctionalGroups)
             {
@@ -1168,13 +1174,20 @@ namespace Madingley
                     ActingStock[0] = FunctionalGroup;
                     ActingStock[1] = ll;
 
+                    // Get biomass of the current stock from the npz model
+                    double CurrentPlanktonStockBiomass = 0.0;
+                    if(FunctionalGroup < PlanktonBiomasses.Length)
+                    {
+                        CurrentPlanktonStockBiomass = PlanktonBiomasses[FunctionalGroup];
+                    }
+                                                            
                     // Run stock ecology
                     MadingleyEcologyStock.RunWithinCellEcology(workingGridCellStocks, ActingStock, EcosystemModelGrid.GetCellEnvironment(
                         latCellIndex, lonCellIndex), EnvironmentalDataUnits, _HumanNPPScenario, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                         CurrentTimeStep, NumBurninSteps, NumImpactSteps, initialisation.RecoveryTimeSteps, initialisation.InstantaneousTimeStep, initialisation.NumInstantaneousTimeStep, 
                         _GlobalModelTimeStepUnit, ProcessTrackers[cellIndex].TrackProcesses, ProcessTrackers[cellIndex],
                         FGTracker, TrackGlobalProcesses, CurrentMonth,
-                        InitialisationFileStrings["OutputDetail"], SpecificLocations, ((initialisation.ImpactCellIndices.Contains((uint)cellIndex) || (initialisation.ImpactAll))));
+                        InitialisationFileStrings["OutputDetail"], SpecificLocations, ((initialisation.ImpactCellIndices.Contains((uint)cellIndex) || (initialisation.ImpactAll))), CurrentPlanktonStockBiomass);
 
                 }
             }

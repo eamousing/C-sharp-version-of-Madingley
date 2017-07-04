@@ -167,6 +167,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ecology\Ecological processes stocks\NutrientsPlanktonModel.cs" />
+    <Compile Include="Ecology\NutrientsPlanktonModelParameters.cs" />
     <Compile Include="Ecology\Ecological processes cohorts\Activity.cs" />
     <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\CommonDispersalMethods.cs" />
     <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\ResponsiveDispersal.cs" />
@@ -323,6 +325,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="input\Model setup\Ecological definition files\MassBinDefinitions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\NutrientsPlanktonModelParameters.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="input\Model setup\Ecological definition files\StockFunctionalGroupDefinitions.csv">

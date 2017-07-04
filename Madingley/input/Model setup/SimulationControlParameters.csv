@@ -5,12 +5,12 @@ Burn-in (years),0
 Impact duration (years),0
 Recovery duration (years),0
 Top Latitude,45
-Bottom Latitude,43
+Bottom Latitude,40
 Leftmost Longitude,-47
 Rightmost Longitude,-45
 Grid Cell Size,1
 Read State,
-Specific Location File,
+Specific Location File,SpecificLocations.csv
 Locations to Track File,
 Plankton size threshold,1
 Draw Randomly,yes

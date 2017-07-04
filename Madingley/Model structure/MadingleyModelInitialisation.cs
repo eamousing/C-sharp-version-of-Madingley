@@ -883,7 +883,9 @@ namespace Madingley
                     case "ecological parameters file":
                         EcologicalParameters.ReadEcologicalParameters(VarValues.GetValue(row).ToString(), outputPath);
                         break;
-
+                    case "npz model parameters file":
+                        NutrientPlanktonModelParameters.ReadNPZModelParameters(VarValues.GetValue(row).ToString(), outputPath);
+                        break;
                 }
             }
 

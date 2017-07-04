@@ -1,5 +1,5 @@
 Parameter,Value
-Live outputs,no
+Live outputs,yes
 Track Processes,no
 Track Cross Cell Processes,no
 Track Global Processes,yes
@@ -20,4 +20,4 @@ Growth Filename,Growth
 Metabolism Filename,Metabolism
 NPP Output Filename,NPP
 Functional Group Flows Filename,FGFlows
-Num Final Years to Track Individual Flows,1
+Num Final Years to Track Individual Flows,0
