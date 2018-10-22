@@ -85,7 +85,7 @@ namespace Madingley
                     // If the spin-up period (100 years) has been completed, then increment cell temperature
                     // according to the number of time-steps that have elapsed since the spin-up ended, for a period of 100 years until the 
                     // maximum thermal increase is reached
-                    if ((currentMonth == 0) && (currentTimestep > (1199)) && (currentTimestep < 2400))
+                    if ((currentMonth == 0) && (currentTimestep >= (239)) && (currentTimestep < 2400))
                     {
                         //if ((currentTimestep > (1199)) && (currentTimestep < 2400))
                         //{
@@ -94,7 +94,7 @@ namespace Madingley
 
                         for (int ii = 0; ii < 12; ii++)
                         {
-                            cellEnvironment["Temperature"][ii] = cellEnvironment["BaselineTemperature"][ii] + ((temperatureScenario.Item2 / 1200) * (currentTimestep+ii - 1199));
+                            cellEnvironment["Temperature"][ii] = cellEnvironment["BaselineTemperature"][ii] + ((temperatureScenario.Item2 / 240) * (currentTimestep+ii - 239));
                         }
 
                         cellEnvironment["AnnualTemperature"][0] = cellEnvironment["Temperature"].Average();

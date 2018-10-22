@@ -152,6 +152,11 @@ namespace Madingley
         private MassBinsHandler _MassBinHandler;
 
         /// <summary>
+        /// The Temperature in the model
+        /// </summary>
+        private double Temperature;
+
+        /// <summary>
         /// The upper limit for the y-axis of the live output
         /// </summary>
         private double MaximumYValue;
@@ -679,6 +684,8 @@ namespace Madingley
 
             string[] TimeDimension = { "Time step" };
 
+            DataConverter.AddVariable(BasicOutputMemory, "Temperature", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+
             if (OutputMetrics)
             {
                 DataConverter.AddVariable(BasicOutputMemory, "Mean Trophic Level", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
@@ -1011,6 +1018,9 @@ namespace Madingley
 
             string[] Keys;
 
+
+            Temperature = ecosystemModelGrid.GetCellEnvironment(cellIndices[cellIndex][0], cellIndices[cellIndex][1])["Temperature"][month];
+
             if (MarineCell)
             {
                 // Get the list of cohort trait combinations to consider
@@ -1275,7 +1285,9 @@ namespace Madingley
             // File outputs for medium and high detail levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
             {
-                
+                DataConverter.ValueToSDS1D(Temperature, "Temperature", "Time step",
+                            ecosystemModelGrid.GlobalMissingValue,
+                            BasicOutputMemory, 0);
 
                 if (MarineCell)
                 {
@@ -1587,6 +1599,11 @@ namespace Madingley
             // File outputs for medium and high detail levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
             {
+
+                DataConverter.ValueToSDS1D(Temperature, "Temperature", "Time step",
+                    ecosystemModelGrid.GlobalMissingValue,
+                    BasicOutputMemory, (int)currentTimeStep + 1);
+
                 if (MarineCell)
                 {
                     // Loop over all cohort trait value combinations and output abundances, densities and biomasses

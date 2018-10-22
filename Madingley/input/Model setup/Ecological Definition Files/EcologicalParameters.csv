@@ -28,6 +28,9 @@ Mortality.Starvation.TimeUnitImplementation,0,0 = day; 1 = month; 2 = year
 Mortality.Starvation.LogisticInflectionPoint,0.6,
 Mortality.Starvation.LogisticScalingParameter,0.05,
 Mortality.Starvation.MaximumStarvationRate,1,
+Feeding.TemperatureDependence.AttackRateActivationEnergy,0.44,Slopes only model From Rall et al. (2012)
+Feeding.TemperatureDependence.HandlingTimeActivationEnergy,-0.27,Slopes only model From Rall et al. (2012)
+Feeding.TemperatureDependence.ReferenceTemperature,310.15, Normalise the Temperature effect to equal 1 at 37degC when ectos and endo attack rates are comparable all else being equal
 Herbivory.RevisedHerbivory.TimeUnitImplementation,0,0 = day; 1 = month; 2 = year
 Herbivory.RevisedHerbivory.Marine.HandlingTimeScalar,0.7,
 Herbivory.RevisedHerbivory.Terrestrial.HandlingTimeScalar,0.7,

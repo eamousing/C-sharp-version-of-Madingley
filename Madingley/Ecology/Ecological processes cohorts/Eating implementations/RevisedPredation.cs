@@ -187,6 +187,19 @@ namespace Madingley
         /// </summary>
         public double KillRateConstantMassExponent { get { return _KillRateConstantMassExponent; } }
 
+
+        private double _AttackRateActivationEnergy;
+        public double AttackRateActivationEnergy { get { return _AttackRateActivationEnergy; } }
+
+        private double _HandlingTimeActivationEnergy;
+        public double HandlingTimeActivationEnergy { get { return _HandlingTimeActivationEnergy; } }
+
+        private double _ReferenceTemperature;
+        public double ReferenceTemperature { get { return _ReferenceTemperature; } }
+
+        private double _BoltzmannConstant;
+        public double BoltzmannConstant { get { return _BoltzmannConstant; } }
+
         public void InitialiseParametersPredation()
         {
             _TimeUnitImplementation =
@@ -200,6 +213,10 @@ namespace Madingley
             _KillRateConstantMassExponent = EcologicalParameters.Parameters["Predation.RevisedPredation.KillRateConstantMassExponent"];
             _FeedingPreferenceStandardDeviation = EcologicalParameters.Parameters["Predation.RevisedPredation.FeedingPreferenceStandardDeviation"];
             NumberOfBins = (int)EcologicalParameters.Parameters["Predation.RevisedPredation.NumberOfMassAggregationBins"];
+            _AttackRateActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.AttackRateActivationEnergy"];
+            _HandlingTimeActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.HandlingTimeActivationEnergy"];
+            _ReferenceTemperature = EcologicalParameters.Parameters["Feeding.TemperatureDependence.ReferenceTemperature"];
+            _BoltzmannConstant = EcologicalParameters.Parameters["BoltzmannConstant"];
         }
 
 

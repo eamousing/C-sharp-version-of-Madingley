@@ -144,6 +144,9 @@ namespace Madingley
         /// 
         private double _HerbivoreLogOptimalPreyBodySizeRatio;
 
+        private double _AttackRateTemperatureScalar;
+        private double _HandlingTimeTemperatureScalar;
+
         /// <summary>
         /// String to hold current stock type
         /// </summary>
@@ -173,6 +176,8 @@ namespace Madingley
             // Store the specified cell area in this instance of this herbivory implementation
             _CellArea = cellArea;
             _CellAreaHectares = cellArea * 100;
+
+
             
         }
 
@@ -202,7 +207,7 @@ namespace Madingley
         /// <param name="madingleyStockDefinitions">The functional group definitions for stocks  in the model</param>
         public void GetEatingPotentialTerrestrial(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, 
             int[] actingCohort, SortedList<string, double[]> cellEnvironment, FunctionalGroupDefinitions madingleyCohortDefinitions, 
-            FunctionalGroupDefinitions madingleyStockDefinitions)
+            FunctionalGroupDefinitions madingleyStockDefinitions, uint currentMonth, uint currentTimeStep)
         {
             // Set the total biomass eaten by the acting cohort to zero
             _TotalBiomassEatenByCohort = 0.0;
@@ -217,12 +222,26 @@ namespace Madingley
             _BiomassesEaten = new double[gridCellStocks.Count][];
             _PotentialBiomassesEaten = new double[gridCellStocks.Count][];
 
+            _AttackRateTemperatureScalar = 
+                (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
+                Math.Exp(AttackRateActivationEnergy*(cellEnvironment["Temperature"][currentMonth]+273.15-_ReferenceTemperature)/
+                (_BoltzmannConstant*_ReferenceTemperature*(cellEnvironment["Temperature"][currentMonth]+273.15))): 1.0;
+
+
+            _HandlingTimeTemperatureScalar =
+                (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
+                Math.Exp(HandlingTimeActivationEnergy * (cellEnvironment["Temperature"][currentMonth] + 273.15 - _ReferenceTemperature) /
+                (_BoltzmannConstant * _ReferenceTemperature * (cellEnvironment["Temperature"][currentMonth] + 273.15))) : 1.0;
+
+
             // Loop over rows in the jagged arrays and initialise each vector
             for (int i = 0; i < gridCellStocks.Count; i++)
             {
                 _BiomassesEaten[i] = new double[gridCellStocks[i].Count];
                 _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count];
             }
+
+            
 
             // Loop over functional groups that can be eaten
             foreach (int FunctionalGroup in _FunctionalGroupIndicesToEat)
@@ -234,11 +253,11 @@ namespace Madingley
                     EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass* 0.1;
 
                     // Calculate the potential biomass eaten from this stock by the acting cohort
-                    _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenTerrestrial(EdibleMass, _BodyMassHerbivore);
+                    _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenTerrestrial(EdibleMass, _BodyMassHerbivore) * _AttackRateTemperatureScalar;
 
                     // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
                     _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i] *
-                        CalculateHandlingTimeTerrestrial(_BodyMassHerbivore);
+                        CalculateHandlingTimeTerrestrial(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
                     
                 }
             }
@@ -305,6 +324,19 @@ namespace Madingley
             _BiomassesEaten = new double[gridCellStocks.Count][];
             _PotentialBiomassesEaten = new double[gridCellStocks.Count][];
 
+            _AttackRateTemperatureScalar =
+                (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
+                Math.Exp(AttackRateActivationEnergy * (cellEnvironment["Temperature"][currentMonth] + 273.15 - _ReferenceTemperature) /
+                (_BoltzmannConstant * _ReferenceTemperature * (cellEnvironment["Temperature"][currentMonth] + 273.15))) : 1.0;
+
+
+            _HandlingTimeTemperatureScalar =
+                (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
+                Math.Exp(HandlingTimeActivationEnergy * (cellEnvironment["Temperature"][currentMonth] + 273.15 - _ReferenceTemperature) /
+                (_BoltzmannConstant * _ReferenceTemperature * (cellEnvironment["Temperature"][currentMonth] + 273.15))) : 1.0;
+
+
+
             // Loop over rows in the jagged arrays and initialise each vector
             for (int i = 0; i < gridCellStocks.Count; i++)
             {
@@ -327,11 +359,11 @@ namespace Madingley
                     _PhytoStockType = madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup);
                     // Calculate the potential biomass eaten from this stock by the acting cohort
                     _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenMarine(EdibleMass, _BodyMassHerbivore,
-                        _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType, temperature, regCoefs);
+                        _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType, temperature, regCoefs)*_AttackRateTemperatureScalar;
 
                     // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
                     _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i] *
-                        CalculateHandlingTimeMarine(_BodyMassHerbivore);
+                        CalculateHandlingTimeMarine(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
 
                 }
             }

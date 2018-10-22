@@ -150,6 +150,21 @@ namespace Madingley
         private double _FeedingPreferenceStandardDeviation;
         public double FeedingPreferenceStandardDeviation { get { return _FeedingPreferenceStandardDeviation; } }
 
+
+        private double _AttackRateActivationEnergy;
+        public double AttackRateActivationEnergy{ get { return _AttackRateActivationEnergy; } }
+
+        private double _HandlingTimeActivationEnergy;
+        public double HandlingTimeActivationEnergy { get { return _HandlingTimeActivationEnergy; } }
+
+        private double _ReferenceTemperature;
+        public double ReferenceTemperature { get { return _ReferenceTemperature; } }
+
+        private double _BoltzmannConstant;
+        public double BoltzmannConstant { get { return _BoltzmannConstant; } }
+        
+
+
         /// <summary>
         /// An instance of the simple random number generator class
         /// </summary>
@@ -172,6 +187,10 @@ namespace Madingley
             _ReferenceMass = EcologicalParameters.Parameters["Herbivory.RevisedHerbivory.HandlingTimeReferenceMass"];
             // todo: make an entry in the parameter file for herbivory
             _FeedingPreferenceStandardDeviation = EcologicalParameters.Parameters["Predation.RevisedPredation.FeedingPreferenceStandardDeviation"];
+            _AttackRateActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.AttackRateActivationEnergy"];
+            _HandlingTimeActivationEnergy = EcologicalParameters.Parameters["Feeding.TemperatureDependence.HandlingTimeActivationEnergy"];
+            _ReferenceTemperature = EcologicalParameters.Parameters["Feeding.TemperatureDependence.ReferenceTemperature"];
+            _BoltzmannConstant = EcologicalParameters.Parameters["BoltzmannConstant"];
         }
 
 

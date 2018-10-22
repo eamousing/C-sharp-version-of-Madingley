@@ -92,7 +92,7 @@ namespace Madingley
         /// <param name="madingleyStockDefinitions">The definitions for stocks in the model</param>
         void GetEatingPotentialTerrestrial(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, int[] actingCohort,
             SortedList<string, double[]> cellEnvironment, FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions
-            madingleyStockDefinitions);
+            madingleyStockDefinitions, uint currentMonth, uint currentTimeStep);
 
 
         /// <summary>
