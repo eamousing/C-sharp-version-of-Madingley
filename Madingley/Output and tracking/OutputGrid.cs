@@ -492,7 +492,7 @@ namespace Madingley
 
             double[] Timings = new double[10];
             
-            if ((OutputMetrics) && (currentTimeStep >= initialisation.TimeStepToStartProcessTrackers))
+            if ((OutputMetrics))// && (currentTimeStep >= initialisation.TimeStepToStartProcessTrackers))
             {
                 //Calculate the values for the ecosystem metrics for each of the grid cells
                 for (int i = 0; i < cellIndices.Count; i++)

@@ -13,3 +13,7 @@ Local,input/Data/Original/Land,cru20,.nc,tmp,nc,Temperature,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,dtr,nc,LandDTR,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,pre,nc,Precipitation,Y,month,mm
 Local,input/Data/Original/Land,cru20,.nc,frs,nc,FrostDays,Y,month,
+Local,input/Data/Original/Ocean,ecto_omni_small_catch,.nc,SmallEctoCatch,nc,SmallEctoCatch,Y,year,tonnes/y
+Local,input/Data/Original/Ocean,ecto_omni_med_catch,.nc,MedEctoCatch,nc,MedEctoCatch,Y,year,tonnes/y
+Local,input/Data/Original/Ocean,ecto_omni_lg_catch,.nc,LgEctoCatch,nc,LgEctoCatch,Y,year,tonnes/y
+Local,input/Data/Original/Ocean,carnivore_catch,.nc,CarnivoreCatch,nc,CarnivoreCatch,Y,year,tonnes/y
