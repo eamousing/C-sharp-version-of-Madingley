@@ -273,7 +273,7 @@ namespace Madingley
         {
             double[] phyto = new double[3];
             double[] nsfPhyto = new double[3];
-            double[] phytoSize = new double[3] { Math.Log10(1E-9), Math.Log10(1E-7), Math.Log10(1E-5) };
+            double[] phytoSize = new double[3] { Math.Log10(1E-7), Math.Log10(1E-5), Math.Log10(1E-3) };
             double[] regCoefs = new double[2];
 
             phyto[0] = 1.145 - 0.021 * no3 - 6.936E-6 * temperature;

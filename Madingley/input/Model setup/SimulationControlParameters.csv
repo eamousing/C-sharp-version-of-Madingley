@@ -13,7 +13,7 @@ Read State,
 Specific Location File,SpecificLocations.csv
 Locations to Track File,
 Plankton size threshold,1
-Draw Randomly,no
+Draw Randomly,yes
 Extinction Threshold,1
 Maximum Number Of Cohorts,1000
 Run Cells In Parallel,no

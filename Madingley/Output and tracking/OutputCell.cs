@@ -1596,6 +1596,7 @@ namespace Madingley
             DataConverter.ValueToSDS1D(TotalHeterotrophBiomassDensity, "Heterotroph Biomass density", "Time step",
                             ecosystemModelGrid.GlobalMissingValue,
                             BasicOutputMemory, (int)currentTimeStep + 1);
+
             // File outputs for medium and high detail levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
             {

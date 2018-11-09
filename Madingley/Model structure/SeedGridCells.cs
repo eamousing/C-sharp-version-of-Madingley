@@ -173,109 +173,109 @@ namespace Madingley
             cellEnvironment, SortedList<string, double> globalDiagnostics, ref Int64 partial, Boolean tracking, double totalCellTerrestrialCohorts,
             double totalCellMarineCohorts, Boolean DrawRandomly, Boolean ZeroAbundance, uint CellNum)
         {
-            // Set the seed for the random number generator from the system time
-            RandomNumberGenerator.SetSeedFromSystemTime();
+            //// Set the seed for the random number generator from the system time
+            //RandomNumberGenerator.SetSeedFromSystemTime();
 
-            // Write out initial cohort information
-            //StreamWriter tempsw = new StreamWriter("C://users//derekt//desktop//ts_cohorts.txt");
-            //tempsw.WriteLine("functional group\tadult mass\tjuvenilemass\tbiomass\tabundance\toptimal pbr");
+            //// Write out initial cohort information
+            ////StreamWriter tempsw = new StreamWriter("C://users//derekt//desktop//ts_cohorts.txt");
+            ////tempsw.WriteLine("functional group\tadult mass\tjuvenilemass\tbiomass\tabundance\toptimal pbr");
 
-            // Define local variables
-            double CohortJuvenileMass;
-            double CohortAdultMassRatio;
-            double CohortAdultMass;
-            double ExpectedLnAdultMassRatio;
-            int[] FunctionalGroupsToUse;
-            double NumCohortsThisCell;
+            //// Define local variables
+            //double CohortJuvenileMass;
+            //double CohortAdultMassRatio;
+            //double CohortAdultMass;
+            //double ExpectedLnAdultMassRatio;
+            //int[] FunctionalGroupsToUse;
+            //double NumCohortsThisCell;
 
-            // Get the minimum and maximum possible body masses for organisms in each functional group
-            double[] MassMinima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("minimum mass");
-            double[] MassMaxima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("maximum mass");
-            string[] NutritionSource = functionalGroups.GetTraitValuesAllFunctionalGroups("nutrition source");
+            //// Get the minimum and maximum possible body masses for organisms in each functional group
+            //double[] MassMinima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("minimum mass");
+            //double[] MassMaxima = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("maximum mass");
+            //string[] NutritionSource = functionalGroups.GetTraitValuesAllFunctionalGroups("nutrition source");
 
-            double[] ProportionTimeActive = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("proportion suitable time active");
+            //double[] ProportionTimeActive = functionalGroups.GetBiologicalPropertyAllFunctionalGroups("proportion suitable time active");
 
-            // Check which realm the cell is in
-            if (cellEnvironment["Realm"][0] == 1.0)
-            {
-                return;
-            }
-            else
-            {
-                // Get the indices of all marine functional groups
-                FunctionalGroupsToUse = functionalGroups.GetFunctionalGroupIndex("realm", "marine", true);
-                NumCohortsThisCell = 100 * FunctionalGroupsToUse.Count();
-            }
-            Debug.Assert(cellEnvironment["Realm"][0] > 0.0, "Missing realm for grid cell");
+            //// Check which realm the cell is in
+            //if (cellEnvironment["Realm"][0] == 1.0)
+            //{
+            //    return;
+            //}
+            //else
+            //{
+            //    // Get the indices of all marine functional groups
+            //    FunctionalGroupsToUse = functionalGroups.GetFunctionalGroupIndex("realm", "marine", true);
+            //    NumCohortsThisCell = 100 * FunctionalGroupsToUse.Count();
+            //}
+            //Debug.Assert(cellEnvironment["Realm"][0] > 0.0, "Missing realm for grid cell");
 
-                // Loop over all functional groups in the model
-                for (int FunctionalGroup = 0; FunctionalGroup < functionalGroups.GetNumberOfFunctionalGroups(); FunctionalGroup++)
-                {
-                    // If it is a functional group that corresponds to the current realm, then seed cohorts
-                    if (FunctionalGroupsToUse.Contains(FunctionalGroup))
-                    {
-                        // Loop over the initial number of cohorts
-                        double NumberOfCohortsInThisFunctionalGroup = 1.0;
-                        if (!ZeroAbundance)
-                        {
-                            NumberOfCohortsInThisFunctionalGroup = functionalGroups.GetBiologicalPropertyOneFunctionalGroup("initial number of gridcellcohorts", FunctionalGroup);
-                        }
-                        for (int jj = 0; jj < NumberOfCohortsInThisFunctionalGroup; jj++)
-                        {
-                            // Check whether the model is set to randomly draw the body masses of new cohorts
-                            if (DrawRandomly)
-                            {
-                            }
-                            else
-                            {
-                                // Use the same seed for the random number generator every time
-                                RandomNumberGenerator.SetSeed((uint)(jj + 1) + CellNum, (uint)((jj + 1) * 3) + CellNum);
-                            }
-                            // Draw adult mass from a log-normal distribution with mean -6.9 and standard deviation 10.0,
-                            // within the bounds of the minimum and maximum body masses for the functional group
-                            CohortAdultMass = Math.Pow(10, (RandomNumberGenerator.GetUniform() * (Math.Log10(MassMaxima[FunctionalGroup]) - Math.Log10(50 * MassMinima[FunctionalGroup])) + Math.Log10(50 * MassMinima[FunctionalGroup])));
+            //    // Loop over all functional groups in the model
+            //    for (int FunctionalGroup = 0; FunctionalGroup < functionalGroups.GetNumberOfFunctionalGroups(); FunctionalGroup++)
+            //    {
+            //        // If it is a functional group that corresponds to the current realm, then seed cohorts
+            //        if (FunctionalGroupsToUse.Contains(FunctionalGroup))
+            //        {
+            //            // Loop over the initial number of cohorts
+            //            double NumberOfCohortsInThisFunctionalGroup = 1.0;
+            //            if (!ZeroAbundance)
+            //            {
+            //                NumberOfCohortsInThisFunctionalGroup = functionalGroups.GetBiologicalPropertyOneFunctionalGroup("initial number of gridcellcohorts", FunctionalGroup);
+            //            }
+            //            for (int jj = 0; jj < NumberOfCohortsInThisFunctionalGroup; jj++)
+            //            {
+            //                // Check whether the model is set to randomly draw the body masses of new cohorts
+            //                if (DrawRandomly)
+            //                {
+            //                }
+            //                else
+            //                {
+            //                    // Use the same seed for the random number generator every time
+            //                    RandomNumberGenerator.SetSeed((uint)(jj + 1) + CellNum, (uint)((jj + 1) * 3) + CellNum);
+            //                }
+            //                // Draw adult mass from a log-normal distribution with mean -6.9 and standard deviation 10.0,
+            //                // within the bounds of the minimum and maximum body masses for the functional group
+            //                CohortAdultMass = Math.Pow(10, (RandomNumberGenerator.GetUniform() * (Math.Log10(MassMaxima[FunctionalGroup]) - Math.Log10(50 * MassMinima[FunctionalGroup])) + Math.Log10(50 * MassMinima[FunctionalGroup])));
 
-                            // Calculate body mass ratios
-                            CalculateBodyMassRatios(out ExpectedLnAdultMassRatio, out CohortAdultMassRatio, out CohortJuvenileMass, ref cellEnvironment, CohortAdultMass, MassMinima[FunctionalGroup], RandomNumberGenerator);
+            //                // Calculate body mass ratios
+            //                CalculateBodyMassRatios(out ExpectedLnAdultMassRatio, out CohortAdultMassRatio, out CohortJuvenileMass, ref cellEnvironment, CohortAdultMass, MassMinima[FunctionalGroup], RandomNumberGenerator);
 
-                            // Only seeding new zooplankton
-                            if (CohortJuvenileMass > 1.0)
-                            {
+            //                // Only seeding new zooplankton
+            //                if (CohortJuvenileMass > 1.0)
+            //                {
 
-                            }
-                            else
-                            {
-                                // Get optimal prey body size
-                                double OptimalPreyBodySizeRatio = CalculateOptimalPreyBodySizeRatio(ref cellEnvironment, functionalGroups.GetTraitNames("Diet", FunctionalGroup) == "allspecial", RandomNumberGenerator);
+            //                }
+            //                else
+            //                {
+            //                    // Get optimal prey body size
+            //                    double OptimalPreyBodySizeRatio = CalculateOptimalPreyBodySizeRatio(ref cellEnvironment, functionalGroups.GetTraitNames("Diet", FunctionalGroup) == "allspecial", RandomNumberGenerator);
 
-                                // Calculate cohort abundance
-                                double NewBiomass;
-                                double NewAbund = CalculateCohortAbundance(ref cellEnvironment, ZeroAbundance, NumCohortsThisCell, CohortJuvenileMass, out NewBiomass, 0.01);
+            //                    // Calculate cohort abundance
+            //                    double NewBiomass;
+            //                    double NewAbund = CalculateCohortAbundance(ref cellEnvironment, ZeroAbundance, NumCohortsThisCell, CohortJuvenileMass, out NewBiomass, 0.01);
 
-                                // Calculate trophic index of cohort
-                                double TrophicIndex = CalculateTrophicIndex(NutritionSource[FunctionalGroup]);
+            //                    // Calculate trophic index of cohort
+            //                    double TrophicIndex = CalculateTrophicIndex(NutritionSource[FunctionalGroup]);
 
-                                // Write out properties of the selected cohort
-                                //tempsw.WriteLine(FunctionalGroup.ToString() + '\t' + CohortAdultMass.ToString() + '\t' +
-                                //     CohortJuvenileMass.ToString() + '\t' + NewBiomass.ToString() + '\t' +
-                                //     NewAbund.ToString() + '\t' + OptimalPreyBodySizeRatio.ToString());
+            //                    // Write out properties of the selected cohort
+            //                    //tempsw.WriteLine(FunctionalGroup.ToString() + '\t' + CohortAdultMass.ToString() + '\t' +
+            //                    //     CohortJuvenileMass.ToString() + '\t' + NewBiomass.ToString() + '\t' +
+            //                    //     NewAbund.ToString() + '\t' + OptimalPreyBodySizeRatio.ToString());
 
-                                // Initialise the new cohort with the relevant properties
-                                Cohort NewCohort = new Cohort((byte)FunctionalGroup, CohortJuvenileMass, CohortAdultMass, CohortJuvenileMass, NewAbund,
-                                OptimalPreyBodySizeRatio, (ushort)0, ProportionTimeActive[FunctionalGroup], ref partial, TrophicIndex, tracking);
+            //                    // Initialise the new cohort with the relevant properties
+            //                    Cohort NewCohort = new Cohort((byte)FunctionalGroup, CohortJuvenileMass, CohortAdultMass, CohortJuvenileMass, NewAbund,
+            //                    OptimalPreyBodySizeRatio, (ushort)0, ProportionTimeActive[FunctionalGroup], ref partial, TrophicIndex, tracking);
 
-                                //Console.WriteLine(NewCohort.CohortID[0]);
+            //                    //Console.WriteLine(NewCohort.CohortID[0]);
 
-                                // Add the new cohort to the list of grid cell cohorts
-                                gridCellCohorts[FunctionalGroup].Add(NewCohort);
+            //                    // Add the new cohort to the list of grid cell cohorts
+            //                    gridCellCohorts[FunctionalGroup].Add(NewCohort);
                             
-                            // Increment the variable tracking the total number of cohorts in the model
-                            globalDiagnostics["NumberOfCohortsInModel"]++;
-                            }
-                        }
+            //                // Increment the variable tracking the total number of cohorts in the model
+            //                globalDiagnostics["NumberOfCohortsInModel"]++;
+            //                }
+            //            }
 
-                    }
-                }
+            //        }
+            //    }
 
            // tempsw.Dispose();
         }
