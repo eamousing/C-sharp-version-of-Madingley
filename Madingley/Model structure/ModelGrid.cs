@@ -226,19 +226,6 @@ namespace Madingley
         private UtilityFunctions Utilities;
 
         /// <summary>
-        /// Thread-local variables for tracking extinction and production of cohorts
-        /// </summary>
-        /// <todo>Needs a little tidying and checking of access levels</todo>
-        private class ThreadLockedParallelVariablesModelGrid
-        {
-            /// <summary>
-            /// Thread-locked variable to track the cohort ID to assign to newly produced cohorts
-            /// </summary>
-            public Int64 NextCohortIDThreadLocked;
-
-        }
-
-        /// <summary>
         /// Constructor for model grid: assigns grid properties and initialises the grid cells
         /// </summary>
         /// <param name="minLat">Minimum grid latitude (degrees)</param>
@@ -902,8 +889,8 @@ namespace Madingley
         /// <param name="DrawRandomly">Whether the model is set to use a random draw</param>
         /// <param name="dispersalOnly">Whether to run dispersal only (i.e. to turn off all other ecological processes</param>
         /// <param name="dispersalOnlyType">For dispersal only runs, the type of dispersal to apply</param>
-        public void SeedGridCellStocksAndCohorts(List<uint[]> cellIndices, FunctionalGroupDefinitions cohortFunctionalGroupDefinitions,
-            FunctionalGroupDefinitions stockFunctionalGroupDefinitions, SortedList<string, double> globalDiagnostics, ref Int64 nextCohortID,
+        public void SeedInitialGridCellStocksAndCohorts(List<uint[]> cellIndices, FunctionalGroupDefinitions cohortFunctionalGroupDefinitions,
+            FunctionalGroupDefinitions stockFunctionalGroupDefinitions, SortedList<string, double> globalDiagnostics,  ref Int64 nextCohortID,
             Boolean tracking, Boolean DrawRandomly, Boolean dispersalOnly, string dispersalOnlyType, Boolean runCellsInParallel)
         {
             Console.WriteLine("Seeding grid cell stocks and cohorts:");
@@ -956,10 +943,12 @@ namespace Madingley
                 }
             }
             int Count = 0;
+
             if (runCellsInParallel)
-            {
+            {       
+
                 Parallel.For(0, cellIndices.Count, (ii, loopState) =>
-                {
+                 {
 
                     if (dispersalOnly)
                     {
@@ -1053,8 +1042,7 @@ namespace Madingley
                     Console.Write("\rGrid Cell: {0} of {1}", Count, cellIndices.Count);
                 }
                 );
-            }
-            else
+            } else
             {
                 for (int ii = 0; ii < cellIndices.Count; ii++)
                 {
@@ -1160,6 +1148,153 @@ namespace Madingley
                 else
                     nextCohortID = StartingCohortsID[cellIndices.Count - 1] + TotalMarineCellCohorts;
             }
+
+        /// <summary>
+        /// Seed the stocks and cohorts for all active cells in the model grid
+        /// </summary>
+        /// <param name="cellIndices">A list of the active cells in the model grid</param>
+        /// <param name="cohortFunctionalGroupDefinitions">The functional group definitions for cohorts in the model</param>
+        /// <param name="stockFunctionalGroupDefinitions">The functional group definitions for stocks in the model</param>
+        /// <param name="globalDiagnostics">A list of global diagnostic variables</param>
+        /// <param name="nextCohortID">The ID number to be assigned to the next produced cohort</param>
+        /// <param name="tracking">Whether process-tracking is enabled</param>
+        /// <param name="DrawRandomly">Whether the model is set to use a random draw</param>
+        /// <param name="dispersalOnly">Whether to run dispersal only (i.e. to turn off all other ecological processes</param>
+        /// <param name="dispersalOnlyType">For dispersal only runs, the type of dispersal to apply</param>
+        public void SeedGridCellStocksAndCohortsPerTimeStep(List<uint[]> cellIndices, FunctionalGroupDefinitions cohortFunctionalGroupDefinitions,
+            FunctionalGroupDefinitions stockFunctionalGroupDefinitions, SortedList<string, double> globalDiagnostics, ref Int64 partial,
+            Boolean tracking, Boolean DrawRandomly, Boolean dispersalOnly, string dispersalOnlyType, Boolean runCellsInParallel)
+        {
+           // Console.WriteLine("Seeding zooplankton:");
+
+            //Work out how many cohorts are to be seeded in each grid cell - split by realm as different set of cohorts initialised by realm
+            int TotalTerrestrialCellCohorts = 0;
+            int TotalMarineCellCohorts = 0;
+
+            int[] TerrestrialFunctionalGroups = cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Terrestrial", false);
+            if (TerrestrialFunctionalGroups == null)
+            {
+                TotalTerrestrialCellCohorts = 0;
+            }
+            else
+            {
+                foreach (int F in TerrestrialFunctionalGroups)
+                {
+                    TotalTerrestrialCellCohorts += (int)cohortFunctionalGroupDefinitions.GetBiologicalPropertyOneFunctionalGroup("Initial number of GridCellCohorts", F);
+                }
+            }
+
+
+            int[] MarineFunctionalGroups = cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("Realm", "Marine", false);
+            if (MarineFunctionalGroups == null)
+            {
+                TotalMarineCellCohorts = 0;
+            }
+            else
+            {
+                foreach (int F in MarineFunctionalGroups)
+                {
+                    TotalMarineCellCohorts += (int)cohortFunctionalGroupDefinitions.GetBiologicalPropertyOneFunctionalGroup("Initial number of GridCellCohorts", F);
+                }
+            }
+
+            int Count = 0;
+
+                for (int ii = 0; ii < cellIndices.Count; ii++)
+                {
+
+                    if (dispersalOnly)
+                    {
+                        if (dispersalOnlyType == "diffusion")
+                        {
+                            // Diffusive dispersal
+
+                            if ((cellIndices[ii][0] == 90) && (cellIndices[ii][1] == 180))
+                            {
+                                InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                                stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                                DrawRandomly, false, (uint)ii);
+                            }
+                            else if ((cellIndices[ii][0] == 95) && (cellIndices[ii][1] == 110))
+                            {
+                                InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                                stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                                DrawRandomly, false, (uint)ii);
+                            }
+                            else
+                            {
+                                InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                                stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                                DrawRandomly, true, (uint)ii);
+                            }
+                            Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
+                        }
+                        else if (dispersalOnlyType == "advection")
+                        {
+                        // Advective dispersal
+                        /*
+                        if ((cellIndices[ii][0] == 58) && (cellIndices[ii][1] == 225))
+                        {
+                            InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                            stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                            DrawRandomly, false, (uint)ii);
+                        }
+                        else if ((cellIndices[ii][0] == 95) && (cellIndices[ii][1] == 110))
+                        {
+                            InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                            stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                            DrawRandomly, false, (uint)ii);
+                        }
+                        else
+                        {
+                            InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                            stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                            DrawRandomly, true, (uint)ii);
+                        }
+                        */
+                        if (InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].CellEnvironment["Realm"][0] == 1.0)
+                            {
+                                ;
+                            }
+                            else
+                            {
+                                InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(
+                                    cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
+                                    ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                                    DrawRandomly, false, (uint)ii);
+                            }
+                            Console.Write("\rGrid Cell: {0} of {1}", ii++, cellIndices.Count);
+                        }
+                        else if (dispersalOnlyType == "responsive")
+                        {
+                            // Responsive dispersal
+
+                            InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(cohortFunctionalGroupDefinitions,
+                            stockFunctionalGroupDefinitions, globalDiagnostics, ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                            DrawRandomly, true, (uint)ii);
+
+                        }
+                        else
+                        {
+                            Debug.Fail("Dispersal only type not recognized from initialisation file");
+                        }
+                        Count++;
+                    }
+
+                    else
+                    {
+                        InternalGrid[cellIndices[ii][0], cellIndices[ii][1]].SeedGridCellCohortsAndStocksPerTimeStep(
+                            cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, globalDiagnostics,
+                            ref partial, tracking, TotalTerrestrialCellCohorts, TotalMarineCellCohorts,
+                            DrawRandomly, false, (uint)ii);
+                        Count++;
+                    }
+                    Console.Write("\rGrid Cell: {0} of {1}", Count, cellIndices.Count);
+                }
+            
+            Console.WriteLine("");
+            Console.WriteLine("");
+        }
 
 
         /// <summary>

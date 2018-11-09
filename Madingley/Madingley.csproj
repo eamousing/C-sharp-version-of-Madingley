@@ -219,6 +219,7 @@
     <Compile Include="Impacts\Fisheries\LWAllometries.cs" />
     <Compile Include="Impacts\Harvesting.cs" />
     <Compile Include="Impacts\ImpactsSpatialHandler.cs" />
+    <Compile Include="Model structure\SeedGridCells.cs" />
     <Compile Include="Model structure\ApplyEcology.cs" />
     <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\Technical code\IEatingImplementation.cs" />
     <Compile Include="Ecology\Ecological processes cohorts\Technical code\IEcologicalProcessAcrossGridCells.cs" />

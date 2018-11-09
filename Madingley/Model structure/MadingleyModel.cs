@@ -296,7 +296,6 @@ namespace Madingley
         public Tuple<string, double, double> HarvestingScenario
         { get { return _HarvestingScenario; } }
 
-
         // A variable to increment for the purposes of giving each cohort a unique ID
         private Int64 NextCohortID;
 
@@ -463,6 +462,27 @@ namespace Madingley
                 MadingleyEcologyCrossGridCell.InitializeCrossGridCellEcology(_GlobalModelTimeStepUnit, DrawRandomly, initialisation);
 
                 EcologyTimer.Start();
+
+                // Loop through and seed grid cells with zooplankton. Haven't yet found a way to do this in parallel
+                   // Console.WriteLine("Initial");
+                    //Console.WriteLine(NextCohortID);
+
+                    // Seed zooplankton each time step
+                    EcosystemModelGrid.SeedGridCellStocksAndCohortsPerTimeStep(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                             GlobalDiagnosticVariables, ref NextCohortID, InitialisationFileStrings["OutputDetail"] == "high", DrawRandomly,
+                             initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel);
+
+                   // Console.WriteLine("Final");
+
+                //for (int i = 0; i < 6; i++)
+                //{
+                //    Console.WriteLine("Num cohorts");
+                //    Console.WriteLine(EcosystemModelGrid.GetGridCellCohorts(_CellList[i][0], _CellList[i][1]).GetNumberOfCohorts());
+                //}
+                
+                //Console.WriteLine("NextCohortID");
+                //Console.WriteLine(NextCohortID);
+                //Console.WriteLine("Done");
 
                 // Loop over grid cells and run biological processes
                 if (RunGridCellsInParallel)
@@ -942,7 +962,7 @@ namespace Madingley
             }
             else
             {
-                EcosystemModelGrid.SeedGridCellStocksAndCohorts(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                EcosystemModelGrid.SeedInitialGridCellStocksAndCohorts(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                     GlobalDiagnosticVariables, ref NextCohortID, InitialisationFileStrings["OutputDetail"] == "high", DrawRandomly,
                     initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel);
             }
