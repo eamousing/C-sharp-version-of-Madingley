@@ -444,6 +444,15 @@ namespace Madingley
             // Temporary variable
             Boolean varExists;
 
+            if (OutputModelStateTimestep.Contains(999999))
+            {
+                OutputTimer.Start();
+                Console.WriteLine("Outputting model state");
+
+                //Writing to text based output
+                WriteModelState.OutputCurrentModelState(EcosystemModelGrid, _CellList, 999999);
+                //WriteModelState.OutputCurrentModelState(EcosystemModelGrid, CohortFunctionalGroupDefinitions, _CellList, CurrentTimeStep, initialisation.MaxNumberOfCohorts, "ModelState");
+            }
 
 
             // Run the model
@@ -537,7 +546,6 @@ namespace Madingley
 
                 OutputTimer.Stop();
                 Console.WriteLine("Global Outputs took: {0}", OutputTimer.GetElapsedTimeSecs());
-
 
                 OutputTimer.Start();
 

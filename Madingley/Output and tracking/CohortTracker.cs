@@ -85,7 +85,11 @@ namespace Madingley
             // todo(erik): not all arguments are used.
         {
             CohortIdentifiers.Add(new uint[3] { latIndex, lonIndex, cohort.CohortID[0] });
-            CohortIdentifierStrings.Add(new string[1] { MarineFGsForTracking.Keys.ToArray()[DetermineFunctionalGroup(cohortOrStockName, Marine)] });
+            if(Marine)
+                CohortIdentifierStrings.Add(new string[1] { MarineFGsForTracking.Keys.ToArray()[DetermineFunctionalGroup(cohortOrStockName, Marine)] });
+            else
+                CohortIdentifierStrings.Add(new string[1] { TerrestrialFGsForTracking.Keys.ToArray()[DetermineFunctionalGroup(cohortOrStockName, Marine)] });
+
             FixedCohortProperties.Add(new float[] { (float)cohort.IndividualBodyMass, (float)cohort.CohortAbundance });
         }
 

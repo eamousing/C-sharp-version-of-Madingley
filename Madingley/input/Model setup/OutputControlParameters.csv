@@ -1,12 +1,12 @@
 Parameter,Value
-Live outputs,yes
+Live outputs,np
 Track Processes,yes
 Track Cross Cell Processes,no
 Track Global Processes,yes
 Track marine specifics,yes
 Output Detail,high
 Output metrics,yes
-Output Model State Timesteps,1199
+Output Model State Timesteps,0-11
 New Cohorts Filename,NewCohorts
 Maturity Filename,Maturity
 Predation Flows Filename,PredationFlows

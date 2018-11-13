@@ -1345,7 +1345,8 @@ namespace Madingley
                     double[] FunctionalDiversity = Metrics.CalculateFunctionalDiversity(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
                         cellIndices, cellIndex);
 
-                    DataConverter.ValueToSDS1D(FunctionalDiversity[0],
+                    DataConverter.ValueToSDS1D(Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
+                        cellIndices, cellIndex),
                                                  "Functional Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                  BasicOutputMemory, 0);
                     DataConverter.ValueToSDS1D(FunctionalDiversity[1],
@@ -1652,7 +1653,8 @@ namespace Madingley
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
                     double[] FunctionalDiversity = Metrics.CalculateFunctionalDiversity(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
                         cellIndices, cellIndex);
-                    DataConverter.ValueToSDS1D(FunctionalDiversity[0],
+                    DataConverter.ValueToSDS1D(Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
+                        cellIndices, cellIndex),
                                                  "Functional Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                  BasicOutputMemory, (int)currentTimeStep + 1);
                     DataConverter.ValueToSDS1D(FunctionalDiversity[1],

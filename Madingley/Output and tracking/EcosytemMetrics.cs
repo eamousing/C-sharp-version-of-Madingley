@@ -5,6 +5,8 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
+
+
 // using RDotNet;
 // using RserveCli;
 
@@ -540,6 +542,146 @@ namespace Madingley
 
         }
 
+        /// <summary>
+        /// Functional richness in the 3D space: log10 Adult body mass, trophic level, metabolic pathway
+        /// </summary>
+        /// <param name="ecosystemModelGrid"></param>
+        /// <param name="cohortDefinitions"></param>
+        /// <param name="cellIndices"></param>
+        /// <param name="cellIndex"></param>
+        /// <returns></returns>
+        public double FunctionalRichness(ModelGrid ecosystemModelGrid, FunctionalGroupDefinitions cohortDefinitions,
+            List<uint[]> cellIndices, int cellIndex)
+        {
+            //Get the cohorts for the specified cell
+            GridCellCohortHandler CellCohorts = ecosystemModelGrid.GetGridCellCohorts(cellIndices[cellIndex][0], cellIndices[cellIndex][1]);
+
+            //Find the min and max adult body mass for
+            // Carnivores, omnivores and herbivores, & endotherms or ectotherms
+            
+            //Find FG inds of endotherms
+            string[] Traits = new string[] { "nutrition source", "endo/ectotherm" };
+            string[] TraitVals;
+
+            TraitVals = new string[]{"carnivore","endotherm"};
+            double[] carn_end_min_max = this.FindMinMaxAdultMass(CellCohorts,cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals,true));
+
+            TraitVals = new string[] { "carnivore", "ectotherm" };
+            double[] carn_ect_min_max= this.FindMinMaxAdultMass(CellCohorts, cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals, true));
+
+            TraitVals = new string[] { "omnivore", "endotherm" };
+            double[] omn_end_min_max = this.FindMinMaxAdultMass(CellCohorts, cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals, true));
+
+            TraitVals = new string[] { "omnivore", "ectotherm" };
+            double[] omn_ect_min_max = this.FindMinMaxAdultMass(CellCohorts, cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals, true));
+
+            TraitVals = new string[] { "herbivore", "endotherm" };
+            double[] herb_end_min_max = this.FindMinMaxAdultMass(CellCohorts, cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals, true));
+
+            TraitVals = new string[] { "herbivore", "ectotherm" };
+            double[] herb_ect_min_max = this.FindMinMaxAdultMass(CellCohorts, cohortDefinitions.GetFunctionalGroupIndex(Traits, TraitVals, true));
+
+            //Construct points for these twelve points
+            // <Trophic Level, Metabolism, log10 Adult mass>
+            Point3D[] points = new Point3D[12];
+
+            // Ects = 1, Ends = 2
+            // Herb = 1, Omn = 2, Carn = 3
+            int i = 0;
+
+            points[i++] = new Point3D(1.0, 1.0, Math.Log10(herb_ect_min_max[0]));//0
+            points[i++] = new Point3D(1.0, 1.0, Math.Log10(herb_ect_min_max[1]));//1
+            points[i++] = new Point3D(1.0, 2.0, Math.Log10(herb_end_min_max[0]));//3
+            points[i++] = new Point3D(1.0, 2.0, Math.Log10(herb_end_min_max[1]));//4
+
+            points[i++] = new Point3D(2.0, 1.0, Math.Log10(omn_ect_min_max[0]));//5
+            points[i++] = new Point3D(2.0, 1.0, Math.Log10(omn_ect_min_max[1]));//6
+            points[i++] = new Point3D(2.0, 2.0, Math.Log10(omn_end_min_max[0]));//7
+            points[i++] = new Point3D(2.0, 2.0, Math.Log10(omn_end_min_max[1]));//8
+
+            points[i++] = new Point3D(3.0, 1.0, Math.Log10(carn_ect_min_max[0]));//9
+            points[i++] = new Point3D(3.0, 1.0, Math.Log10(carn_ect_min_max[1]));//10
+            points[i++] = new Point3D(3.0, 2.0, Math.Log10(carn_end_min_max[0]));//11
+            points[i++] = new Point3D(3.0, 2.0, Math.Log10(carn_end_min_max[1]));//12
+
+            //Should be 20 simplices
+            Triangle[] Mesh = new Triangle[20];
+            i = 0;
+            Mesh[i++] = new Triangle(points[6], points[2], points[0]);//6,  2,  0
+            Mesh[i++] = new Triangle(points[4], points[6], points[0]);// 4,  6,  0
+            Mesh[i++] = new Triangle(points[10], points[4], points[8]);//10,  4,  8
+            Mesh[i++] = new Triangle(points[10], points[4], points[6]);//[10,  4,  6
+            Mesh[i++] = new Triangle(points[5], points[1], points[3]);//5,  1,  3
+            Mesh[i++] = new Triangle(points[5], points[9], points[3]);// 5,  9,  3
+            Mesh[i++] = new Triangle(points[7], points[11], points[9]);// 7, 11,  9
+            Mesh[i++] = new Triangle(points[7], points[9], points[3]);//7,  9,  3]
+            Mesh[i++] = new Triangle(points[1], points[3], points[2]);//1,  3,  2
+            Mesh[i++] = new Triangle(points[1], points[2], points[0]);// 1,  2,  0
+            Mesh[i++] = new Triangle(points[5], points[1], points[0]);// 5,  1,  0
+            Mesh[i++] = new Triangle(points[5], points[4], points[8]);// 5,  4,  8
+            Mesh[i++] = new Triangle(points[5], points[9], points[8]);//  5,  9,  8
+            Mesh[i++] = new Triangle(points[5], points[4], points[0]);//  5,  4,  0
+            Mesh[i++] = new Triangle(points[11], points[9], points[8]);// [11,  9,  8
+            Mesh[i++] = new Triangle(points[11], points[10], points[8]);// [11, 10,  8
+            Mesh[i++] = new Triangle(points[7], points[3], points[2]);//  7,  3,  2
+            Mesh[i++] = new Triangle(points[7], points[6], points[2]);//  7,  6,  2
+            Mesh[i++] = new Triangle(points[7], points[10], points[6]);// 7, 10,  6
+            Mesh[i++] = new Triangle(points[7], points[11], points[10]);//  7, 11, 10
+
+
+
+            return VolumeOfMeshVertex(Mesh,points[0]);
+        }
+
+
+        public double VolumeOfMeshVertex(Triangle[] triangles,Point3D p0)
+        {
+
+            foreach (Triangle t in triangles)
+            {
+                t.ToTetrahedron(p0);
+            }
+
+            var vols = from t in triangles
+                       select (Math.Abs(DotProduct(Minus(t.P1,t.P4),CrossProduct(Minus(t.P2,t.P4),Minus(t.P3,t.P4))))/6.0);
+
+            return Math.Abs(vols.Sum());
+        }
+
+        
+        public double DotProduct(Point3D a, Point3D b)
+        {
+            return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);
+        }
+
+        public Point3D CrossProduct(Point3D a, Point3D b)
+        {
+            return new Point3D(x: (a.Y*b.Z) - (a.Z*b.Y),y: (a.Z*b.X)-(a.X*b.Z), z: (a.X*b.Y)-(a.Y*b.X));
+        }
+
+        public Point3D Minus(Point3D a, Point3D b)
+        {
+            return new Point3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        private double[] FindMinMaxAdultMass(GridCellCohortHandler CellCohorts, int[] fgs)
+        {
+            double MinAM = double.MaxValue;
+            double MaxAM = double.MinValue;
+
+            foreach (var fg in fgs)
+            {
+                foreach (Cohort c in CellCohorts[fg])
+                {
+                    if (c.AdultMass < MinAM) MinAM = c.AdultMass;
+                    if (c.AdultMass > MaxAM) MaxAM = c.AdultMass;
+                }
+            }
+
+            return new double[] { MinAM, MaxAM };
+        }
+
+
         private double[,] CalculateDistanceMatrix(double[] continuousTrait, double traitMaxVal, double traitMinVal)
         {
             double[,] D = new double[continuousTrait.Length, continuousTrait.Length];
@@ -627,4 +769,70 @@ namespace Madingley
         }
 
     }
+
+    public class Mesh
+    {
+        public Triangle[] _Mesh;
+
+        public Mesh(Triangle[] mesh)
+        {
+            _Mesh = mesh;
+        }
+    }
+
+    public class Triangle
+    {
+        public Point3D P1;
+        public Point3D P2;
+        public Point3D P3;
+        //Change into tetrahedrons
+        public Point3D P4;
+
+        public Triangle(Point3D p1,Point3D p2,Point3D p3)
+        {
+            P1 = p1;
+            P2 = p2;
+            P3 = p3;
+        }
+
+        public void ToTetrahedron(Point3D p4)
+        {
+            P4 = p4;
+        }
+
+        public Point3D SurfaceNormal()
+        {
+
+            //U = p2 - p1
+            //V = p3 - p1
+            Point3D U = new Point3D(P2.X - P1.X,P2.Y - P1.Y, P2.Z-P1.Z);
+            Point3D V = new Point3D(P3.X-P1.X,P3.Y-P1.Y,P3.Z-P3.Y);
+            double Nx = (U.Y * V.Z) - (U.Z * V.Y);
+            double Ny = (U.Z * V.X) - (U.X * V.Z);
+            double Nz = (U.X * V.Y) - (U.Y * V.X);
+
+            return new Point3D(Nx, Ny, Nz);
+        }
+
+    }
+
+    public class Point3D
+    {
+        public double X;
+
+        public double Y;
+        public double Z;
+
+        public Point3D(double x, double y, double z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+
+    }
+
+
+
 }
