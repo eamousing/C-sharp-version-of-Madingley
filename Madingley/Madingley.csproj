@@ -214,9 +214,6 @@
     <Compile Include="Ecology\Ecological processes cohorts\Technical code\IEcologicalProcessWithinGridCells.cs" />
     <Compile Include="Impacts\ClimateChange.cs" />
     <Compile Include="Impacts\Fisheries\ApplyFishingCatches.cs" />
-    <Compile Include="Impacts\Fisheries\FishTraits.cs" />
-    <Compile Include="Impacts\Fisheries\InputCatchData.cs" />
-    <Compile Include="Impacts\Fisheries\LWAllometries.cs" />
     <Compile Include="Impacts\Harvesting.cs" />
     <Compile Include="Impacts\ImpactsSpatialHandler.cs" />
     <Compile Include="Model structure\SeedGridCells.cs" />

@@ -492,7 +492,7 @@ namespace Madingley
 
             HANPP = ecosystemModelGrid.GetEnviroGrid("HANPP", 0);
             Temperature = ecosystemModelGrid.GetEnviroGrid("Temperature", currentMonth);
-            ExcessUnmetFishing = ecosystemModelGrid.GetEnviroGrid("SmallEctoCatch", 0);
+            ExcessUnmetFishing = ecosystemModelGrid.GetEnviroGrid("FishingDeficit", 0);
 
             double[] Timings = new double[10];
             

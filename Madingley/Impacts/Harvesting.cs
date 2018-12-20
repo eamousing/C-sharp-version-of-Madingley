@@ -59,7 +59,7 @@ namespace Madingley
                             Convert.ToInt32(cellEnvironment["LonIndex"][0])] = new ApplyFishingCatches();
 
                         // Apply the catches
-                        ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
+                        cellEnvironment["FishingDeficit"][0] = ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
                             Convert.ToInt32(cellEnvironment["LonIndex"][0])].ApplyCatches(gridCellCohorts, cohortFGs, cellEnvironment, globalModelTimestepUnits, Convert.ToInt32(cellEnvironment["LatIndex"][0]),
                             Convert.ToInt32(cellEnvironment["LonIndex"][0]));
                     }
