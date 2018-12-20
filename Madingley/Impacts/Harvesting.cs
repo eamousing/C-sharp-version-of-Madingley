@@ -44,6 +44,7 @@ namespace Madingley
             {
 
                 //If this is marine cell
+                Console.WriteLine(cellEnvironment["Realm"][0]);
                 if (cellEnvironment["Realm"][0] == 2.0)
                 {
 
@@ -52,7 +53,7 @@ namespace Madingley
                     {
                         // Do not apply any harvesting
                     }
-                    else if (harvestingScenario.Item1 == "yes")
+                    else if (fishingScenario.Item1 == "yes")
                     {
                         //Initialise an instance of ApplyFishingCatches for this cell. Note that there is no burn-in period.
                             ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
@@ -62,6 +63,10 @@ namespace Madingley
                         cellEnvironment["FishingDeficit"][0] = ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
                             Convert.ToInt32(cellEnvironment["LonIndex"][0])].ApplyCatches(gridCellCohorts, cohortFGs, cellEnvironment, globalModelTimestepUnits, Convert.ToInt32(cellEnvironment["LatIndex"][0]),
                             Convert.ToInt32(cellEnvironment["LonIndex"][0]));
+                    } else
+                    {
+                        Console.WriteLine("Fishing scenario not recognized");
+
                     }
 
                 }

@@ -31,28 +31,24 @@ namespace Madingley
             double CatchDeficit = 0.0;
 
             // Calculate the scalar to convert from the time step units used by this implementation of dispersal to the global model time step units
-            double SaupTimeUnitConversion = Utilities.ConvertTimeUnits("year", globalModelTimeStepUnit);
-            Console.WriteLine("Time change factor = :" + SaupTimeUnitConversion);
-            Console.ReadKey();
+            double SaupTimeUnitConversion = Utilities.ConvertTimeUnits(globalModelTimeStepUnit, "year");
 
             // Loop through the targeted functional groups
             // Small omnivorous ectotherms
-            int[] SmallOmniEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto omni mall it", false);
+            int[] SmallOmniEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto omni small it", false);
 
             if (SmallOmniEcto != null)
             {
                 // Get total catch
                 TotalCatch = cellEnvironment["SmallEctoCatch"][0];
-                Console.WriteLine("Original total catch:" + TotalCatch);
+                Console.WriteLine("Original small ecto total catch (tonnes / year):" + TotalCatch);
                 TotalCatch = ConvertSAUPUnitsToMadingley(TotalCatch, SaupTimeUnitConversion);
-                Console.WriteLine("Revised total catch: " + TotalCatch);
-                Console.ReadKey();
+                Console.WriteLine("Revised small ecto total catch ( g / Month): " + TotalCatch);
 
                 // Run the fishing
-                RunFishing(SmallOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 1.0, ref CatchDeficit);
+                RunFishing(SmallOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 1.0, ref CatchDeficit, "Small ectos");
 
                 Console.WriteLine("Catch deficit: " + CatchDeficit);
-                Console.ReadKey();
 
             } else
             {
@@ -69,7 +65,7 @@ namespace Madingley
                 TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["MedEctoCatch"][0], SaupTimeUnitConversion);
 
                 // Run the fishing
-                RunFishing(MedOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.5, ref CatchDeficit);
+                RunFishing(MedOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.5, ref CatchDeficit, "Med ectos");
 
             }
             else
@@ -87,7 +83,7 @@ namespace Madingley
                 TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["LgEctoCatch"][0], SaupTimeUnitConversion);
 
                 // Run the fishing
-                RunFishing(LargeOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.25, ref CatchDeficit);
+                RunFishing(LargeOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.25, ref CatchDeficit, "Large ectos");
 
             }
             else
@@ -102,10 +98,10 @@ namespace Madingley
             if (CarnEcto != null)
             {
                 // Get total catch
-                TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["CarnEctoCatch"][0], SaupTimeUnitConversion);
+                TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["CarnivoreCatch"][0], SaupTimeUnitConversion);
 
                 // Run the fishing
-                RunFishing(CarnEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.1, ref CatchDeficit);
+                RunFishing(CarnEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.1, ref CatchDeficit, "Carnivorous ectos");
 
             }
             else
@@ -167,7 +163,7 @@ namespace Madingley
             return CatchScaleFactor;
         }
 
-        private void RunFishing(int[] functionalGroupsToApplyCatch, double totalCatchToApply, FunctionalGroupDefinitions madingleyCohortDefinitions, GridCellCohortHandler gridCellCohorts, double dMj, ref double catchDeficit)
+        private void RunFishing(int[] functionalGroupsToApplyCatch, double totalCatchToApply, FunctionalGroupDefinitions madingleyCohortDefinitions, GridCellCohortHandler gridCellCohorts, double dMj, ref double catchDeficit, string group)
         {
             double CatchScaleFactor;
             double TotalModelCatch = 0.0;
@@ -194,8 +190,7 @@ namespace Madingley
                     ApplyCatch(gridCellCohorts, FunctionalGroup, i, maxFGBodyMass, dMj, CatchScaleFactor);
                 }
 
-                Console.WriteLine("Total model catch: " + TotalModelCatch);
-                Console.ReadKey();
+                Console.WriteLine("Total model catch" + group + ": " + TotalModelCatch);
             }
         }
             
