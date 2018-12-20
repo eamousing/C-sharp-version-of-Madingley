@@ -924,7 +924,7 @@ namespace Madingley
         /// <param name="latCellSize">The latitudinal size of cells in the model grid</param>
         /// <param name="lonCellSize">The longitudinal size of cells in the model grid</param>
         /// <returns>The area weighted value of an environmental variable from the envirodata cells overlapped by the cell specified by lat and lon</returns>
-        public double GetValue(double lat, double lon, uint timeInterval, out Boolean missingValue, double latCellSize, double lonCellSize)
+        public double GetValue(double lat, double lon, uint timeInterval, out Boolean missingValue, double latCellSize, double lonCellSize, Boolean average = true, double dataLayerLatStep = 1.0, double dataLayerLonStep = 1.0)
         {
             // Check that the requested latitude and longitude are within the scope of the environmental variable
             Debug.Assert(lat >= LatMin && lat < LatMin + (NumLats * LatStep), "Requested latitude is outside dataset latitude range: " + _ReadFileString);
@@ -1225,43 +1225,99 @@ namespace Madingley
             double WeightedValue = 0.0;
             missingValue = false;
 
-            if (invertedLat)
+            // Average over values
+            if (average)
             {
-                if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
+                if (invertedLat)
                 {
-                    missingValue = true;
-                    WeightedValue = this.MissingValue;
-                }
-                else
-                {
-                    for (int ii = ClosestLowerLatIndex; ii <= ClosestUpperLatIndex; ii++)
+                    if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
                     {
-                        for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
+                        missingValue = true;
+                        WeightedValue = this.MissingValue;
+                    }
+                    else
+                    {
+                        for (int ii = ClosestLowerLatIndex; ii <= ClosestUpperLatIndex; ii++)
                         {
-                            if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                            for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
                             {
-                                WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                                {
+                                    WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
+                else
                 {
-                    missingValue = true;
-                    WeightedValue = this.MissingValue;
+                    if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
+                    {
+                        missingValue = true;
+                        WeightedValue = this.MissingValue;
+                    }
+                    else
+                    {
+                        for (int ii = ClosestUpperLatIndex; ii <= ClosestLowerLatIndex; ii++)
+                        {
+                            for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
+                            {
+                                if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                                {
+                                    WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                }
+                            }
+                        }
+                    }
+                }
+            // Sum values
+            } else
+            {
+                //Console.WriteLine(invertedLat);
+                if (invertedLat)
+                {
+                    if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
+                    {
+                        missingValue = true;
+                        WeightedValue = this.MissingValue;
+                    }
+                    else
+                    {
+                        for (int ii = ClosestLowerLatIndex; ii <= ClosestUpperLatIndex; ii++)
+                        {
+                            for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
+                            {
+                                if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                                {
+                                    if ((OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex]) > 0)
+                                    {
+                                        WeightedValue += _DataArray[(int)timeInterval][ii, jj] * Utilities.CalculateGridCellArea(lat + (ii - ClosestLowerLatIndex) * dataLayerLatStep, dataLayerLatStep, dataLayerLonStep) / OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex];
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    for (int ii = ClosestUpperLatIndex; ii <= ClosestLowerLatIndex; ii++)
+                    if (CumulativeNonMissingValueOverlapArea.CompareTo(0.0) == 0)
                     {
-                        for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
+                        missingValue = true;
+                        WeightedValue = this.MissingValue;
+                    }
+                    else
+                    {
+                        for (int ii = ClosestUpperLatIndex; ii <= ClosestLowerLatIndex; ii++)
                         {
-                            if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                            for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
                             {
-                                WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                                {
+                                    if (OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] > 0)
+                                    {
+                                        WeightedValue += _DataArray[(int)timeInterval][ii, jj] * Utilities.CalculateGridCellArea(lat - (ClosestLowerLatIndex - ii) * dataLayerLatStep, dataLayerLatStep, dataLayerLonStep) / OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex];
+                                    }
+                                    }
                             }
                         }
                     }
