@@ -1101,6 +1101,7 @@ namespace Madingley
         /// <param name="marineCell">Whether the current cell is a marine cell</param>
         private void CalculateHighLevelOutputs(ModelGrid ecosystemModelGrid, List<uint[]> cellIndices, int cellIndex, Boolean marineCell)
         {
+            Boolean varExists;
 
             // Calcalate the outputs arranged by mass bin
             CalculateMassBinOutputs(ecosystemModelGrid, cellIndices, cellIndex, marineCell);
@@ -1136,6 +1137,11 @@ namespace Madingley
                         }
                     }
                 }
+            }
+
+            if (marineCell)
+            {
+                FishingDeficit = ecosystemModelGrid.GetEnviroLayer("FishingDeficit", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
             }
 
 
@@ -1781,7 +1787,7 @@ namespace Madingley
         /// <param name="marineCell">Whether the current cell is a marine cell</param>
         public void FinalOutputs(ModelGrid EcosystemModelGrid, FunctionalGroupDefinitions CohortFunctionalGroupDefinitions, 
             FunctionalGroupDefinitions StockFunctionalGroupDefinitions, List<uint[]> cellIndices, int cellNumber, 
-            SortedList<string, double> GlobalDiagnosticVariables, MadingleyModelInitialisation initialisation, uint month, Boolean marineCell)
+            SortedList<string, double> GlobalDiagnosticVariables, MadingleyModelInitialisation initialisation, uint month, Boolean marineCell, uint currentTimeStep)
         {
             // Calculate output variables
             CalculateOutputs(EcosystemModelGrid, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions, cellIndices,cellNumber, GlobalDiagnosticVariables, initialisation, month, marineCell);
