@@ -769,6 +769,14 @@ namespace Madingley
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " abundance in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " biomass in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
                 }
+
+                if (TrackMarineSpecifics)
+                {
+                    // Add a variable to keep track of the NPP incoming from the VGPM model
+                    DataConverter.AddVariable(BasicOutputMemory, "Incoming NPP", "gC / m^2 / day", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add a variable to track the fishing deficit
+                    DataConverter.AddVariable(BasicOutputMemory, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                }
             }
             else
             {
@@ -778,14 +786,6 @@ namespace Madingley
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " biomass in mass bins", 2, MassBinDimensions, ecosystemModelGrid.GlobalMissingValue, TimeSteps, MassBins);
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " abundance in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " biomass in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
-                }
-
-                if (TrackMarineSpecifics)
-                {
-                    // Add a variable to keep track of the NPP incoming from the VGPM model
-                    DataConverter.AddVariable(BasicOutputMemory, "Incoming NPP", "gC / m^2 / day", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
-                    // Add a variable to track the fishing deficit
-                    DataConverter.AddVariable(BasicOutputMemory, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 }
             }
 
@@ -1218,6 +1218,11 @@ namespace Madingley
                         // Add in the initial value
                         DataConverter.ValueToSDS1D(TotalBiomassDensitiesOut[TraitValue], TraitValue + " biomass", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                     }
+
+                    // Add in the fishing deficit
+                    DataConverter.AddVariable(DataSetToViewLive, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                 }
                 else
                 {
@@ -1240,12 +1245,6 @@ namespace Madingley
                         // Add in the initial value
                         DataConverter.ValueToSDS1D(TotalBiomassDensitiesOut[TraitValue], TraitValue + " biomass", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                     }
-
-
-                    // Add in the fishing deficit
-                    DataConverter.AddVariable(DataSetToViewLive, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
-                    // Add in the initial value
-                    DataConverter.ValueToSDS1D(FishingDeficit,"Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
 
                 }
 
@@ -1304,6 +1303,9 @@ namespace Madingley
                             ecosystemModelGrid.GlobalMissingValue,
                         BasicOutputMemory, 0);
                     }
+
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
                 }
                 else
                 {
