@@ -226,9 +226,12 @@ namespace Madingley
             _JuvenileMass = c._JuvenileMass;
             _AdultMass = c._AdultMass;
             _IndividualBodyMass = c._IndividualBodyMass;
+            _IndividualReproductivePotentialMass = c._IndividualReproductivePotentialMass;
             _CohortAbundance = c._CohortAbundance;
             _BirthTimeStep = c._BirthTimeStep;
+            _BaseTimestepBirth = c._BaseTimestepBirth;
             _MaturityTimeStep = c._MaturityTimeStep;
+            _BaseTimestepMaturity = c._BaseTimestepMaturity;
             _LogOptimalPreyBodySizeRatio = c._LogOptimalPreyBodySizeRatio;
             _MaximumAchievedBodyMass = c._MaximumAchievedBodyMass;
             _Merged = c._Merged;

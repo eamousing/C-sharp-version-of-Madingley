@@ -692,7 +692,7 @@ namespace Madingley
                 DataConverter.AddVariable(BasicOutputMemory, "Trophic Evenness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Biomass Evenness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Functional Richness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
-                DataConverter.AddVariable(BasicOutputMemory, "Rao Functional Evenness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                DataConverter.AddVariable(BasicOutputMemory, "Rao Functional Entropy", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Biomass Richness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Trophic Richness", "dimensionless", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
 
@@ -1332,44 +1332,38 @@ namespace Madingley
 
                 if (OutputMetrics)
                 {
-                    DataConverter.ValueToSDS1D(Metrics.CalculateMeanTrophicLevelCell(ecosystemModelGrid,cellIndices,cellIndex),
+                    DataConverter.ValueToSDS1D(Metrics.CalculateMeanTrophicLevelCell(ecosystemModelGrid, cellIndices, cellIndex),
                                                 "Mean Trophic Level", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions,cellIndices, cellIndex,"trophic index"),
-                                                "Trophic Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
-                                                BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "biomass"),
-                                                "Biomass Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
-                                                BasicOutputMemory, 0);
-
-                    double[] FunctionalDiversity = Metrics.CalculateFunctionalDiversity(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
-                        cellIndices, cellIndex);
-
-                    DataConverter.ValueToSDS1D(Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
+                    
+                    DataConverter.ValueToSDS1D(Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
                         cellIndices, cellIndex),
                                                  "Functional Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                  BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(FunctionalDiversity[1],
-                                                "Rao Functional Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                    DataConverter.ValueToSDS1D(Metrics.CalculateRaoFunctionalEntropy1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
+                        cellIndices, cellIndex),
+                                                "Rao Functional Entropy", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
 
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[0],
+                    double[] BiomassRichness1D = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass");
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[0],
                                                 "Biomass Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[1],
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[1],
                                                 "Min Bodymass", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[2],
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[2],
                                                 "Max Bodymass", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
 
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[0],
+                    double[] TrophicRichness1D = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index");
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[0],
                                                 "Trophic Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[1],
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[1],
                                                 "Min Trophic Index", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[2],
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[2],
                                                 "Max Trophic Index", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, 0);
 
@@ -1645,39 +1639,41 @@ namespace Madingley
                     DataConverter.ValueToSDS1D(Metrics.CalculateMeanTrophicLevelCell(ecosystemModelGrid, cellIndices, cellIndex),
                                                 "Mean Trophic Level", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid,cohortFunctionalGroupDefinitions, cellIndices, cellIndex,"trophic index"),
-                                                "Trophic Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
-                                                BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "biomass"),
-                                                "Biomass Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
-                                                BasicOutputMemory, (int)currentTimeStep + 1);
-                    double[] FunctionalDiversity = Metrics.CalculateFunctionalDiversity(ecosystemModelGrid, cohortFunctionalGroupDefinitions, 
-                        cellIndices, cellIndex);
+                    //DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid,cohortFunctionalGroupDefinitions, cellIndices, cellIndex,"trophic index"),
+                    //                            "Trophic Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                    //                            BasicOutputMemory, (int)currentTimeStep + 1);
+                    //DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "biomass"),
+                    //                            "Biomass Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                    //                            BasicOutputMemory, (int)currentTimeStep + 1);
+                    
                     DataConverter.ValueToSDS1D(Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
                         cellIndices, cellIndex),
                                                  "Functional Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                  BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(FunctionalDiversity[1],
-                                                "Rao Functional Evenness", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                    DataConverter.ValueToSDS1D(Metrics.CalculateRaoFunctionalEntropy1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
+                        cellIndices, cellIndex),
+                                                "Rao Functional Entropy", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
 
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[0],
+                    double[] BiomassRichness1D = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass");
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[0],
                                                 "Biomass Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[1],
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[1],
                                                 "Min Bodymass", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Biomass")[2],
+                    DataConverter.ValueToSDS1D(BiomassRichness1D[2],
                                                 "Max Bodymass", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
 
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[0],
+                    double[] TrophicRichness1D = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index");
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[0],
                                                 "Trophic Richness", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[1],
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[1],
                                                 "Min Trophic Index", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
-                    DataConverter.ValueToSDS1D(Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, cellIndex, "Trophic index")[2],
+                    DataConverter.ValueToSDS1D(TrophicRichness1D[2],
                                                 "Max Trophic Index", "Time step", ecosystemModelGrid.GlobalMissingValue,
                                                 BasicOutputMemory, (int)currentTimeStep + 1);
 

@@ -236,6 +236,10 @@ namespace Madingley
             sw.WriteLine("Predation\tKillRateConstant\t" + Convert.ToString(_KillRateConstant));
             sw.WriteLine("Predation\tFeedingPreferenceStandardDeviation\t" + Convert.ToString(_FeedingPreferenceStandardDeviation));
             sw.WriteLine("Predation\tKillRateConstantMassExponent\t" + Convert.ToString(_KillRateConstantMassExponent));
+            sw.WriteLine("Predation\tAttackRateActivationEnergy\t" + Convert.ToString(_AttackRateActivationEnergy));
+            sw.WriteLine("Predation\tHandlingTimeActivationEnergy\t" + Convert.ToString(_HandlingTimeActivationEnergy));
+            sw.WriteLine("Predation\tReferenceTemperature\t" + Convert.ToString(_ReferenceTemperature));
+            sw.WriteLine("Predation\tBoltzmannConstant\t" + Convert.ToString(_BoltzmannConstant));
 
         }
 

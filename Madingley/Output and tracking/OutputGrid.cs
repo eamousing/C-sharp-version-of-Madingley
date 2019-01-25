@@ -331,7 +331,7 @@ namespace Madingley
                     MetricsGrid.Add("Functional Richness", FR);
 
                     double[,] RFE = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
-                    MetricsGrid.Add("Rao Functional Evenness", RFE);
+                    MetricsGrid.Add("Rao Functional Entropy", RFE);
 
                     double[,] BR = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
                     MetricsGrid.Add("Biomass Richness", BR);
@@ -364,7 +364,7 @@ namespace Madingley
                     DataConverter.AddVariable(GridOutput, "Trophic Evenness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
                     DataConverter.AddVariable(GridOutput, "Biomass Evenness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
                     DataConverter.AddVariable(GridOutput, "Functional Richness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
-                    DataConverter.AddVariable(GridOutput, "Rao Functional Evenness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
+                    DataConverter.AddVariable(GridOutput, "Rao Functional Entropy", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
                     DataConverter.AddVariable(GridOutput, "Biomass Richness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
                     DataConverter.AddVariable(GridOutput, "Trophic Richness", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
                     DataConverter.AddVariable(GridOutput, "Max Bodymass", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
@@ -519,22 +519,21 @@ namespace Madingley
                     Timings[2] += OutputTimer.GetElapsedTimeSecs();
 
 
+                    
+
+                    MetricsGrid["Mean Trophic Level"][latIndex, lonIndex] = Metrics.CalculateMeanTrophicLevelCell(ecosystemModelGrid, cellIndices, i);
+                    MetricsGrid["Trophic Evenness"][latIndex, lonIndex] = Metrics.CalculateFunctionalEntropyRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "trophic index");
+                    MetricsGrid["Biomass Evenness"][latIndex, lonIndex] = Metrics.CalculateFunctionalEntropyRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "biomass");
+
                     OutputTimer.Start();
-                    double[] FunctionalDiversity = new double[] {0.0,0.0};// Metrics.CalculateFunctionalDiversity(ecosystemModelGrid, cohortFunctionalGroupDefinitions,
-                                                                       //                                cellIndices, i);
+                    MetricsGrid["Rao Functional Entropy"][latIndex, lonIndex] = Metrics.CalculateRaoFunctionalEntropy1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i);
                     OutputTimer.Stop();
 
                     Timings[3] += OutputTimer.GetElapsedTimeSecs();
 
-                    MetricsGrid["Mean Trophic Level"][latIndex, lonIndex] = Metrics.CalculateMeanTrophicLevelCell(ecosystemModelGrid, cellIndices, i);
-                    MetricsGrid["Trophic Evenness"][latIndex, lonIndex] = Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "trophic index");
-                    MetricsGrid["Biomass Evenness"][latIndex, lonIndex] = Metrics.CalculateFunctionalEvennessRao(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "biomass");
-                 
-
-                    // Functional Richness not currently calculated
-                    //MetricsGrid["Functional Richness"][latIndex, lonIndex] = FunctionalDiversity[0];
+                   
                     OutputTimer.Start();
-                    MetricsGrid["Rao Functional Evenness"][latIndex, lonIndex] = FunctionalDiversity[1];
+                    MetricsGrid["Functional Richness"][latIndex, lonIndex] = Metrics.FunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i);
 
                     OutputTimer.Stop();
 
@@ -542,7 +541,7 @@ namespace Madingley
 
 
                     OutputTimer.Start();
-                    double[] TempArray = Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "Biomass");
+                    double[] TempArray = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "Biomass");
                     OutputTimer.Stop();
                     Timings[5] += OutputTimer.GetElapsedTimeSecs();
 
@@ -552,7 +551,7 @@ namespace Madingley
                     MetricsGrid["Max Bodymass"][latIndex, lonIndex] = TempArray[2];
 
                     OutputTimer.Start();
-                    TempArray = Metrics.CalculateFunctionalRichness(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "Trophic Index");
+                    TempArray = Metrics.CalculateFunctionalRichness1D(ecosystemModelGrid, cohortFunctionalGroupDefinitions, cellIndices, i, "Trophic Index");
                     OutputTimer.Stop();
                     Timings[6] += OutputTimer.GetElapsedTimeSecs();
 
@@ -600,8 +599,8 @@ namespace Madingley
             Console.WriteLine("Calculating MTL took: {0}", Timings[0]);
             Console.WriteLine("Calculating trophic evenness took: {0}", Timings[1]);
             Console.WriteLine("Calculating biomass evenness took: {0}", Timings[2]);
-            Console.WriteLine("Calculating functional diversity took: {0}", Timings[3]);
-            Console.WriteLine("Calculating rao took: {0}", Timings[4]);
+            Console.WriteLine("Calculating functional entropy took: {0}", Timings[3]);
+            Console.WriteLine("Calculating functional richness 3D took: {0}", Timings[4]);
             Console.WriteLine("Calculating functional richness (biomass) took: {0}", Timings[5]);
             Console.WriteLine("Calculating functional richness (trophic index) took: {0}", Timings[6]);
             Console.WriteLine("Calculating mean body mass took: {0}", Timings[7]);

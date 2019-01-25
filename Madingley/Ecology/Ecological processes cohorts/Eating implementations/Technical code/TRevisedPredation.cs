@@ -606,7 +606,7 @@ namespace Madingley
 
             // No cannibalism; do this outside the loop to speed up the calculations
             _TimeUnitsToHandlePotentialFoodItems -= PotentialAbundanceEaten[actingCohort[0]][actingCohort[1]] *
-                CalculateHandlingTimeTerrestrial(_BodyMassPredator)*_AttackRateTemperatureScalar;
+                CalculateHandlingTimeTerrestrial(_BodyMassPredator) * _HandlingTimeTemperatureScalar;
             PotentialAbundanceEaten[actingCohort[0]][actingCohort[1]] = 0.0;
         }
 

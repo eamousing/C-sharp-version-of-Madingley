@@ -213,6 +213,10 @@ namespace Madingley
             sw.WriteLine("Herbivory\t_AttackRateExponentTerrestrial\t" + Convert.ToString(HerbivoryRateMassExponent));
             sw.WriteLine("Herbivory\t_AttackRateExponentMarine\t" + Convert.ToString(HerbivoryRateMassExponent));
             sw.WriteLine("Herbivory\tHerbivoryRateMassExponent\t" + Convert.ToString(HerbivoryRateMassExponent));
+            sw.WriteLine("Herbivory\tAttackRateActivationEnergy\t" + Convert.ToString(_AttackRateActivationEnergy));
+            sw.WriteLine("Herbivory\tHandlingTimeActivationEnergy\t" + Convert.ToString(_HandlingTimeActivationEnergy));
+            sw.WriteLine("Herbivory\tReferenceTemperature\t" + Convert.ToString(_ReferenceTemperature));
+            sw.WriteLine("Herbivory\tBoltzmannConstant\t" + Convert.ToString(_BoltzmannConstant));
         }
 
 
