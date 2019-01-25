@@ -12,9 +12,6 @@ namespace Madingley
     /// </summary>
     public class Harvesting
     {
-        //A class to hold the fisheries catch data for harvesting from marine cells.
-        //Currently this data is from the UBC Sea around Us database
-        InputCatchData FisheriesCatch;
         UtilityFunctions Utilities = new UtilityFunctions();
         ApplyFishingCatches[,] ApplyCatches;
 
@@ -24,8 +21,8 @@ namespace Madingley
         /// </summary>
         public Harvesting(float[] modelLats, float[] modelLons, float cellSize)
         {
-            //FisheriesCatch = new InputCatchData(modelLats, modelLons,cellSize);
-            //ApplyCatches = new ApplyFishingCatches[modelLats.Length,modelLons.Length];
+            // Note that this can probably be sped up by instantiating one instance of Apply Catches for each grid cell at the start rather than in each time step.
+            ApplyCatches = new ApplyFishingCatches[modelLats.Length,modelLons.Length];
         }
 
         /// <summary>
@@ -39,59 +36,37 @@ namespace Madingley
         /// <param name="cellEnvironment">The environment in the current grid cell</param>
         /// <param name="impactCell">The index of the cell, within the list of all cells to run, to apply the scenario for</param>
         public void RemoveHarvestedIndividuals(GridCellCohortHandler gridCellCohorts,
-            Tuple<string, double, double> harvestingScenario, uint currentTimestep, uint burninSteps, uint impactSteps, uint totalSteps,
+            Tuple<string, double, double> harvestingScenario, Tuple<string, double, double> fishingScenario, uint currentTimestep, uint burninSteps, uint impactSteps, uint totalSteps,
             SortedList<string, double[]> cellEnvironment, Boolean impactCell, string globalModelTimestepUnits, FunctionalGroupDefinitions cohortFGs)
         {
+            
             if (impactCell)
             {
 
                 //If this is marine cell
+                Console.WriteLine(cellEnvironment["Realm"][0]);
                 if (cellEnvironment["Realm"][0] == 2.0)
                 {
 
 
-                    if (harvestingScenario.Item1 == "no")
+                    if (fishingScenario.Item1 == "no")
                     {
                         // Do not apply any harvesting
                     }
-                    else if (harvestingScenario.Item1 == "constant")
+                    else if (fishingScenario.Item1 == "yes")
                     {
-                        double TargetBiomass;
-                        if (FisheriesCatch != null)
-                        {
-                            TargetBiomass = (1000 *
-                            FisheriesCatch.ModelGridCatchTotal[Convert.ToInt32(cellEnvironment["LatIndex"][0]), Convert.ToInt32(cellEnvironment["LonIndex"][0])])
-                            / 12.0;
-                        }
-                        else
-                        {
-                            TargetBiomass = harvestingScenario.Item2;
-                        }
-                        // If the burn-in period has been completed, then apply
-                        // the harvesting scenario
-                        if (currentTimestep > burninSteps)
-                        {
-                            ApplyHarvesting(gridCellCohorts, TargetBiomass, cellEnvironment);
-                        }
-                    }
-                    else if (harvestingScenario.Item1 == "fish-catch")
-                    {
-                        //Initialise an instance of ApplyFishingCatches for this cell
-                        if (currentTimestep == burninSteps)
+                        //Initialise an instance of ApplyFishingCatches for this cell. Note that there is no burn-in period.
                             ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
-                            Convert.ToInt32(cellEnvironment["LonIndex"][0])] = new ApplyFishingCatches(FisheriesCatch);
+                            Convert.ToInt32(cellEnvironment["LonIndex"][0])] = new ApplyFishingCatches();
 
-                        if (currentTimestep > burninSteps)
-                        {
-                            //Bin the cohorts of the current cell
-                            ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
-                            Convert.ToInt32(cellEnvironment["LonIndex"][0])].BinCohorts(gridCellCohorts, FisheriesCatch, cohortFGs);
-                            //Now remove the catch
-                            ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
-                            Convert.ToInt32(cellEnvironment["LonIndex"][0])].ApplyCatches(gridCellCohorts, FisheriesCatch,
-                                Convert.ToInt32(cellEnvironment["LatIndex"][0]),
-                                Convert.ToInt32(cellEnvironment["LonIndex"][0]));
-                        }
+                        // Apply the catches
+                        cellEnvironment["FishingDeficit"][0] = ApplyCatches[Convert.ToInt32(cellEnvironment["LatIndex"][0]),
+                            Convert.ToInt32(cellEnvironment["LonIndex"][0])].ApplyCatches(gridCellCohorts, cohortFGs, cellEnvironment, globalModelTimestepUnits, Convert.ToInt32(cellEnvironment["LatIndex"][0]),
+                            Convert.ToInt32(cellEnvironment["LonIndex"][0]));
+                    } else
+                    {
+                        Console.WriteLine("Fishing scenario not recognized");
+
                     }
 
                 }

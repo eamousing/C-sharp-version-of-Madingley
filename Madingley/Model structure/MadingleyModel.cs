@@ -287,6 +287,16 @@ namespace Madingley
         { get { return _TemperatureScenario; } }
 
         /// <summary>
+        /// The scenario of fishing to use
+        /// </summary>
+        private Tuple<string, double, double> _FishingScenario;
+        /// <summary>
+        /// Get the scenario of temperature change to use
+        /// </summary>
+        public Tuple<string, double, double> FishingScenario
+        { get { return _FishingScenario; } }
+
+        /// <summary>
         /// The scenario of direct animal harvesting to use
         /// </summary>
         private Tuple<string, double, double> _HarvestingScenario;
@@ -661,7 +671,7 @@ namespace Madingley
                 for (int i = 0; i < _CellList.Count; i++)
                 {
                     CellOutputs[i].FinalOutputs(EcosystemModelGrid, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
-                        _CellList, i, GlobalDiagnosticVariables, initialisation, CurrentMonth, EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
+                        _CellList, i, GlobalDiagnosticVariables, initialisation, CurrentMonth, EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0, CurrentTimeStep);
                 }
             }
             else
@@ -714,8 +724,8 @@ namespace Madingley
 
             }
 
-            // Apply any direct harvesting impacts
-            HarvestingSimulator.RemoveHarvestedIndividuals(WorkingGridCellCohorts, _HarvestingScenario, CurrentTimeStep, NumBurninSteps,
+            // Apply any direct harvesting impacts (including fishing)
+            HarvestingSimulator.RemoveHarvestedIndividuals(WorkingGridCellCohorts, _HarvestingScenario, _FishingScenario, CurrentTimeStep, NumBurninSteps,
                 NumImpactSteps, NumTimeSteps, EcosystemModelGrid.GetCellEnvironment(_CellList[cellIndex][0], _CellList[cellIndex][1]),
                 (initialisation.ImpactCellIndices.Contains((uint)cellIndex) || initialisation.ImpactAll), _GlobalModelTimeStepUnit, CohortFunctionalGroupDefinitions);
 
@@ -761,9 +771,11 @@ namespace Madingley
             CohortFunctionalGroupDefinitions = initialisation.CohortFunctionalGroupDefinitions;
             StockFunctionalGroupDefinitions = initialisation.StockFunctionalGroupDefinitions;
             EnviroStack = initialisation.EnviroStack;
+            Console.WriteLine(scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["fishing"]);
             _HumanNPPScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["npp"];
             _TemperatureScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["temperature"];
             _HarvestingScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["harvesting"];
+            _FishingScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["fishing"];
             OutputFilesSuffix = outputFilesSuffix;
             EnvironmentalDataUnits = initialisation.Units;
             OutputModelStateTimestep = initialisation.OutputStateTimestep;

@@ -96,6 +96,11 @@ namespace Madingley
         private double TotalIncomingNPP;
 
         /// <summary>
+        /// Deficit in fishing (empirical catch - modelled catch)
+        /// </summary>
+        private double FishingDeficit;
+
+        /// <summary>
         /// Total densities of all cohorts within each combination of cohort traits
         /// </summary>
         private SortedList<string, double> TotalDensitiesOut = new SortedList<string, double>();
@@ -703,7 +708,6 @@ namespace Madingley
                 DataConverter.AddVariable(BasicOutputMemory, "Geometric Mean Bodymass", "g", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Arithmetic Mean Bodymass", "g", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 DataConverter.AddVariable(BasicOutputMemory, "Ecosystem Metabolism Per Unit Biomass", "gC / g", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
-
             }
 
             if (marineCell)
@@ -718,12 +722,6 @@ namespace Madingley
                 foreach (string TraitValue in StockTraitIndicesMarine.Keys)
                 {
                     DataConverter.AddVariable(BasicOutputMemory, TraitValue + " biomass density", "Kg / km^2", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
-                }
-
-                if (TrackMarineSpecifics)
-                {
-                    // Add a variable to keep track of the NPP incoming from the VGPM model
-                    DataConverter.AddVariable(BasicOutputMemory, "Incoming NPP", "gC / m^2 / day", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 }
             }
             else
@@ -762,6 +760,8 @@ namespace Madingley
             string[] DoubleMassBinDimensions = new string[] { "Adult Mass bin", "Juvenile Mass bin", "Time step" };
 
 
+            string[] TimeDimension = { "Time step" };
+
             if (OutputMetrics)
             {
                 DataConverter.AddVariable(MassBinsOutputMemory, "Trophic Index Distribution", 2, new string[] {"Time step","Trophic Index Bins"}, ecosystemModelGrid.GlobalMissingValue, TimeSteps, Metrics.TrophicIndexBinValues);
@@ -775,6 +775,14 @@ namespace Madingley
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " biomass in mass bins", 2, MassBinDimensions, ecosystemModelGrid.GlobalMissingValue, TimeSteps, MassBins);
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " abundance in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
                     DataConverter.AddVariable(MassBinsOutputMemory, "Log " + TraitValue + " biomass in juvenile vs adult bins", 3, DoubleMassBinDimensions, ecosystemModelGrid.GlobalMissingValue, MassBins, MassBins, TimeSteps);
+                }
+
+                if (TrackMarineSpecifics)
+                {
+                    // Add a variable to keep track of the NPP incoming from the VGPM model
+                    DataConverter.AddVariable(BasicOutputMemory, "Incoming NPP", "gC / m^2 / day", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add a variable to track the fishing deficit
+                    DataConverter.AddVariable(BasicOutputMemory, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                 }
             }
             else
@@ -878,8 +886,8 @@ namespace Madingley
                 // Add the functional group indices of these trait combinations to the list of indices of the trait values to consider, 
                 // keyed with a concatenated version of the trait values
                 string TraitValueJoin = "";
-                string[] TimeDimension = { "Time step" };
-                for (int i = 0; i < TraitValueSearch.Count(); i++)
+
+            for (int i = 0; i < TraitValueSearch.Count(); i++)
                 {
                     TraitValueJoin = "";
                     foreach (string TraitValue in TraitValueSearch[i])
@@ -1092,13 +1100,6 @@ namespace Madingley
             TotalLivingBiomass += ecosystemModelGrid.GetStateVariable("Biomass", "NA", stockFunctionalGroupDefinitions.AllFunctionalGroupsIndex,
                 cellIndices[cellIndex][0], cellIndices[cellIndex][1], "stock", initialisation);
             TotalLivingBiomassDensity += ecosystemModelGrid.GetStateVariableDensity("Biomass", "NA", stockFunctionalGroupDefinitions.AllFunctionalGroupsIndex, cellIndices[cellIndex][0], cellIndices[cellIndex][1], "stock", initialisation) / 1000.0;
-
-
-            if (TrackMarineSpecifics && MarineCell)
-            {
-                bool varExists;
-                TotalIncomingNPP = ecosystemModelGrid.GetEnviroLayer("NPP", month, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
-            }
         }
 
         /// <summary>
@@ -1110,6 +1111,7 @@ namespace Madingley
         /// <param name="marineCell">Whether the current cell is a marine cell</param>
         private void CalculateHighLevelOutputs(ModelGrid ecosystemModelGrid, List<uint[]> cellIndices, int cellIndex, Boolean marineCell)
         {
+            Boolean varExists;
 
             // Calcalate the outputs arranged by mass bin
             CalculateMassBinOutputs(ecosystemModelGrid, cellIndices, cellIndex, marineCell);
@@ -1145,6 +1147,11 @@ namespace Madingley
                         }
                     }
                 }
+            }
+
+            if (marineCell)
+            {
+                FishingDeficit = ecosystemModelGrid.GetEnviroLayer("FishingDeficit", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
             }
 
 
@@ -1227,6 +1234,11 @@ namespace Madingley
                         // Add in the initial value
                         DataConverter.ValueToSDS1D(TotalBiomassDensitiesOut[TraitValue], TraitValue + " biomass", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                     }
+
+                    // Add in the fishing deficit
+                    DataConverter.AddVariable(DataSetToViewLive, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                 }
                 else
                 {
@@ -1249,9 +1261,10 @@ namespace Madingley
                         // Add in the initial value
                         DataConverter.ValueToSDS1D(TotalBiomassDensitiesOut[TraitValue], TraitValue + " biomass", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
                     }
+
                 }
 
-                
+
 
             }
         }
@@ -1308,6 +1321,9 @@ namespace Madingley
                             ecosystemModelGrid.GlobalMissingValue,
                         BasicOutputMemory, 0);
                     }
+
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
                 }
                 else
                 {
@@ -1378,11 +1394,13 @@ namespace Madingley
                                                 BasicOutputMemory, 0);
                 }
 
+                /*
                 if (MarineCell && TrackMarineSpecifics)
                 {
                     DataConverter.ValueToSDS1D(TotalIncomingNPP, "Incoming NPP", "Time step", ecosystemModelGrid.GlobalMissingValue,
                         BasicOutputMemory, 0);
                 }
+                */
 
                 // File outputs for high detail level
                 if (ModelOutputDetail == OutputDetailLevel.High)
@@ -1537,6 +1555,9 @@ namespace Madingley
                         // Add in the initial values of stock biomass density
                         DataConverter.ValueToSDS1D(TotalBiomassDensitiesOut[TraitValue], TraitValue + " biomass", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
                     }
+
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+
                 }
                 else
                 {
@@ -1693,6 +1714,9 @@ namespace Madingley
                 {
                     DataConverter.ValueToSDS1D(TotalIncomingNPP, "Incoming NPP", "Time step", ecosystemModelGrid.GlobalMissingValue,
                         BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                        BasicOutputMemory, (int)currentTimeStep + 1);
                 }
 
 
@@ -1778,7 +1802,7 @@ namespace Madingley
         /// <param name="marineCell">Whether the current cell is a marine cell</param>
         public void FinalOutputs(ModelGrid EcosystemModelGrid, FunctionalGroupDefinitions CohortFunctionalGroupDefinitions, 
             FunctionalGroupDefinitions StockFunctionalGroupDefinitions, List<uint[]> cellIndices, int cellNumber, 
-            SortedList<string, double> GlobalDiagnosticVariables, MadingleyModelInitialisation initialisation, uint month, Boolean marineCell)
+            SortedList<string, double> GlobalDiagnosticVariables, MadingleyModelInitialisation initialisation, uint month, Boolean marineCell, uint currentTimeStep)
         {
             // Calculate output variables
             CalculateOutputs(EcosystemModelGrid, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions, cellIndices,cellNumber, GlobalDiagnosticVariables, initialisation, month, marineCell);

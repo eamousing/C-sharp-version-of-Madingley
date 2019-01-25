@@ -1,99 +1,221 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Madingley
 {
     //Instantiate one of these for each grid cell
-    class ApplyFishingCatches
+    public class ApplyFishingCatches
     {
+            /// <summary>
+            /// Instance of the class to perform general functions
+            /// </summary>
+            private UtilityFunctions Utilities;
 
-        List<Tuple<int[], double>>[] BinnedCohorts;
-        double[] BinnedTotalModelBiomass;
-        double[] DefecitCatch;
+        // Slope of the selectivity function (Carozza et al. 2017)
+        private double cZero = 16.7787;
 
-        double AdultMassProportionFished;
+        // Parameter to convert sigmoidal function in length to mass (Froese et al. 2013)
+        private double delta2 = 3.0;
 
-        public ApplyFishingCatches(InputCatchData fishCatch)
+        public ApplyFishingCatches()
         {
-            BinnedTotalModelBiomass = new double[fishCatch.MassBins.Length];
-            DefecitCatch = new double[fishCatch.MassBins.Length];
-
-            BinnedCohorts = new List<Tuple<int[], double>>[BinnedTotalModelBiomass.Length];
-            AdultMassProportionFished = 0.5;
+                // Initialise the utility functions
+                Utilities = new UtilityFunctions();
         }
 
-        //Function to bin cohorts according to the mass bins defined for the catch data
-        /// <summary>
-        /// Bin cohorts according to the mass bins defined for the catch data
-        /// Constructs a list of functional group and cohort indices falling within each mass bin
-        /// as well as the total biomass available to be fished in each
-        /// </summary>
-        /// <param name="c">The grid cell cohorts</param>
-        /// <param name="fishCatch">Fisheries catch data</param>
-        public void BinCohorts(GridCellCohortHandler c, InputCatchData fishCatch, FunctionalGroupDefinitions cohortFGs)
+        // Apply fishing catches to cohorts within a specfic functional gorup
+        public double ApplyCatches(GridCellCohortHandler gridCellCohorts, FunctionalGroupDefinitions madingleyCohortDefinitions, SortedList<string, double[]> cellEnvironment, string globalModelTimeStepUnit, int latIndex, int lonIndex)
         {
-            int mb = 0;
 
-            int[] FishFGs = cohortFGs.GetFunctionalGroupIndex("Endo/Ectotherm", "Ectotherm",false);
+            double TotalCatch;
+            double CatchDeficit = 0.0;
 
-            for (int i = 0; i < BinnedCohorts.Length; i++)
+            // Calculate the scalar to convert from the time step units used by this implementation of dispersal to the global model time step units
+            double SaupTimeUnitConversion = Utilities.ConvertTimeUnits(globalModelTimeStepUnit, "year");
+
+            // Loop through the targeted functional groups
+            // Small omnivorous ectotherms
+            int[] SmallOmniEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto omni small it", false);
+
+            if (SmallOmniEcto != null)
             {
-                BinnedCohorts[i] = new List<Tuple<int[], double>>();
+                // Get total catch
+                TotalCatch = cellEnvironment["SmallEctoCatch"][0];
+                Console.WriteLine("Original small ecto total catch (tonnes / year):" + TotalCatch);
+                TotalCatch = ConvertSAUPUnitsToMadingley(TotalCatch, SaupTimeUnitConversion);
+                Console.WriteLine("Revised small ecto total catch ( g / Month): " + TotalCatch);
+
+                // Run the fishing
+                RunFishing(SmallOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 1.0, ref CatchDeficit, "Small ectos");
+
+                Console.WriteLine("Catch deficit: " + CatchDeficit);
+
+            } else
+            {
+                Console.WriteLine("Small omnivorous ectotherms group not found for ApplyFishingCatches class. Note that group description should be: ecto omni small it");
+                Console.ReadKey();
             }
 
-            foreach (int fg in FishFGs)
-	        {
-                for (int i = 0; i < c[fg].Count(); i++)
-                {
-                    //Find the mass bin for this cohort
-                    mb = fishCatch.MassBins.ToList().FindIndex(a => a >= c[fg,i].AdultMass);
-                    if (mb < 0) mb = fishCatch.UnknownMassBinIndex - 1;
-                    
-                    //Check if the current bodymass is greater than the proportion of the adult mass
-                    if (c[fg, i].IndividualBodyMass >= c[fg, i].AdultMass * AdultMassProportionFished)
-                    {
-                        //Calculate the total biomass of this cohort
-                        double CohortBiomass = (c[fg, i].IndividualBodyMass + c[fg, i].IndividualReproductivePotentialMass) *
-                                                    c[fg, i].CohortAbundance;
-                        //Add the indices and total biomass to the bins
-                        BinnedCohorts[mb].Add(new Tuple<int[], double>(new int[] { fg, i }, CohortBiomass));
-                        BinnedTotalModelBiomass[mb] += CohortBiomass;
-                    }
-                }
+            // Medium omnivorous ectotherms
+            int[] MedOmniEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto omni medium it", false);
+
+            if (MedOmniEcto != null)
+            {
+                // Get total catch
+                TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["MedEctoCatch"][0], SaupTimeUnitConversion);
+
+                // Run the fishing
+                RunFishing(MedOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.5, ref CatchDeficit, "Med ectos");
+
+            }
+            else
+            {
+                Console.WriteLine("Medium omnivorous ectotherms group not found for ApplyFishingCatches class. Note that group description should be: ecto omni medium it");
+                Console.ReadKey();
+            }
+
+            // Large omnivorous ectotherms
+            int[] LargeOmniEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto omni large it", false);
+
+            if (LargeOmniEcto != null)
+            {
+                // Get total catch
+                TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["LgEctoCatch"][0], SaupTimeUnitConversion);
+
+                // Run the fishing
+                RunFishing(LargeOmniEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.25, ref CatchDeficit, "Large ectos");
+
+            }
+            else
+            {
+                Console.WriteLine("Large omnivorous ectotherms group not found for ApplyFishingCatches class. Note that group description should be: ecto omni large it");
+                Console.ReadKey();
+            }
+
+            // Large omnivorous ectotherms
+            int[] CarnEcto = madingleyCohortDefinitions.GetFunctionalGroupIndex("group description", "ecto carn it", false);
+
+            if (CarnEcto != null)
+            {
+                // Get total catch
+                TotalCatch = ConvertSAUPUnitsToMadingley(cellEnvironment["CarnivoreCatch"][0], SaupTimeUnitConversion);
+
+                // Run the fishing
+                RunFishing(CarnEcto, TotalCatch, madingleyCohortDefinitions, gridCellCohorts, 0.1, ref CatchDeficit, "Carnivorous ectos");
+
+            }
+            else
+            {
+                Console.WriteLine("Carnivorous ectotherms group not found for ApplyFishingCatches class. Note that group description should be: ecto carn it");
+                Console.ReadKey();
+            }
+
+            Console.WriteLine("Total catch deficit this time step: " + CatchDeficit);
+
+            return CatchDeficit;
+        }
+
+        // Calculate the mass that can be caught from each cohort based on its biomass and the selectivity function
+        private double CalculatePotentialMassCaught(GridCellCohortHandler gridCellCohorts, int functionalGroup, int cohortNumber, double maxFGBodyMass, double eMj)
+        {
+            // Get the body mass of individuals in this cohort
+            double PreyBodyMass = gridCellCohorts[functionalGroup][cohortNumber].IndividualBodyMass;
+            double PreyReproductiveBodyMass = gridCellCohorts[functionalGroup][cohortNumber].IndividualReproductivePotentialMass;
+
+            if ((gridCellCohorts[functionalGroup][cohortNumber].CohortAbundance > 0) && (PreyBodyMass > 0))
+            {
+                // Calculate the fraction of individuals caught and their total biomass based on the selectivity given target body mass
+                return gridCellCohorts[functionalGroup][cohortNumber].CohortAbundance * CalculateSelectivity(PreyBodyMass, eMj, maxFGBodyMass) * (PreyBodyMass + PreyReproductiveBodyMass);
+            }
+            else
+                return 0.0;
+        }
+
+        // Apply potential mass caught
+        private void ApplyCatch(GridCellCohortHandler gridCellCohorts, int functionalGroup, int cohortNumber, double maxFGBodyMass, double eMj, double CatchScaleFactor)
+        {
+            // Get the body mass of individuals in this cohort
+            double PreyBodyMass = gridCellCohorts[functionalGroup][cohortNumber].IndividualBodyMass;
+            double PreyReproductiveBodyMass = gridCellCohorts[functionalGroup][cohortNumber].IndividualReproductivePotentialMass;
+
+            if ((gridCellCohorts[functionalGroup][cohortNumber].CohortAbundance > 0) && (PreyBodyMass > 0))
+            {
+                // Calculate the fraction of individuals caught and their total biomass based on the selectivity given target body mass
+                gridCellCohorts[functionalGroup][cohortNumber].CohortAbundance -= gridCellCohorts[functionalGroup][cohortNumber].CohortAbundance * CalculateSelectivity(PreyBodyMass,  eMj, maxFGBodyMass) * CatchScaleFactor;
             }
         }
 
-
-        public void ApplyCatches(GridCellCohortHandler c, InputCatchData fishCatch, int latIndex, int lonIndex)
+        private double CalculateCatchScaling(double totalModelCatch, double totalEmpiricalCatch, ref double catchDeficit)
         {
-            //Hold the total catch in each mass bin for this cell
-            double[] BinnedCellCatch = new double[fishCatch.MassBins.Length];
+            double CatchScaleFactor;
 
-            //TO DO: make the time division flexible according to the model timestep
-            for (int mb = 0; mb < BinnedCellCatch.Length; mb++)
+            // Now adjust catch as appropriate between model catch and empirical catch
+            if (totalModelCatch >= totalEmpiricalCatch)
             {
-                BinnedCellCatch[mb] = fishCatch.ModelGridCatch[latIndex, lonIndex, mb]/12.0;
+                CatchScaleFactor = totalEmpiricalCatch / totalModelCatch;
+            }
+            else
+            {
+                CatchScaleFactor = 1.0;
+                catchDeficit += totalEmpiricalCatch - totalModelCatch;
+            }
 
-                if (BinnedCellCatch[mb] > 0)
+            return CatchScaleFactor;
+        }
+
+        private void RunFishing(int[] functionalGroupsToApplyCatch, double totalCatchToApply, FunctionalGroupDefinitions madingleyCohortDefinitions, GridCellCohortHandler gridCellCohorts, double dMj, ref double catchDeficit, string group)
+        {
+            double CatchScaleFactor;
+            double TotalModelCatch = 0.0;
+
+            // Loop through to work out how much of each cohort should be removed based on the catch function. Note that the total can then either exceed or fall short of actual SAUP catch
+            foreach (int FunctionalGroup in functionalGroupsToApplyCatch)
+            {
+                // Get the max body mass of this FG
+
+                double maxFGBodyMass = madingleyCohortDefinitions.GetBiologicalPropertyOneFunctionalGroup("maximum mass", FunctionalGroup);
+
+                // Loop over cohorts within the functional group and calculate potential catch
+                for (int i = 0; i < gridCellCohorts[i].Count; i++)
                 {
-
-                    if (BinnedTotalModelBiomass[mb] <= BinnedCellCatch[mb])
-                    {
-                        DefecitCatch[mb] = BinnedCellCatch[mb] - BinnedTotalModelBiomass[mb];
-                        BinnedCellCatch[mb] = BinnedTotalModelBiomass[mb];
-                    }
-
-                    foreach (var v in BinnedCohorts[mb])
-                    {
-                        double Contribution = v.Item2 / BinnedTotalModelBiomass[mb];
-                        double AbundanceCaught = Contribution * BinnedCellCatch[mb] / (c[v.Item1].IndividualBodyMass + c[v.Item1].IndividualReproductivePotentialMass);
-                        c[v.Item1].CohortAbundance -= AbundanceCaught;
-                    }
+                    TotalModelCatch += CalculatePotentialMassCaught(gridCellCohorts, FunctionalGroup, i, maxFGBodyMass, dMj);
                 }
 
+                // Now adjust catch as appropriate between model catch and empirical catch
+                CatchScaleFactor = CalculateCatchScaling(TotalModelCatch, totalCatchToApply, ref catchDeficit);
+
+                // Loop over cohorts within the functional group and apply catch
+                for (int i = 0; i < gridCellCohorts[i].Count; i++)
+                {
+                    ApplyCatch(gridCellCohorts, FunctionalGroup, i, maxFGBodyMass, dMj, CatchScaleFactor);
+                }
+
+                Console.WriteLine("Total model catch" + group + ": " + TotalModelCatch);
             }
+        }
+            
+        // Convert SAUP catch units (tonnes / year / grid cell) to Madingley units (g / month (typically) / grid cell
+        private double ConvertSAUPUnitsToMadingley(double SAUPCatch, double timeUnitConversion)
+        {
+            double MadingleyCatch;
+
+                // Convert from yearly catches to monthly. Assume even distribution of catch over a year
+                MadingleyCatch = SAUPCatch * timeUnitConversion;
+
+            // Convert from tonnes to grams
+                MadingleyCatch = MadingleyCatch * 1000000;
+
+            return MadingleyCatch;
+        }
+
+        // Calculate the selectivity curve for a particular body mass 
+        private double CalculateSelectivity(double cohortBodyMass, double dParameter, double maxBiomassFG)
+        {
+
+            double thresholdMass = dParameter * maxBiomassFG * 0.6198;
+
+            // Claculate as per the general approach of Carozza et al. 2017
+            return Math.Pow((1 + Math.Pow(cohortBodyMass / thresholdMass, -cZero/delta2)), -1);
 
         }
 

@@ -127,6 +127,29 @@ namespace Madingley
                             }
                         }
                         break;
+                    case "fishing":
+                        for (int i = 0; i < _scenarioNumber; i++)
+                        {
+                            string[] pair = TempValues.GetValue(i).ToString().Split(' ');
+
+                            if (pair.Length > 2)
+                            {
+                                _scenarioParameters.ElementAt(i).Item3.Add
+                                    ("fishing", new Tuple<string, double, double>(pair[0], Convert.ToDouble(pair[1]), Convert.ToDouble(pair[2])));
+                            }
+                            else if (pair.Length == 2)
+                            {
+                                _scenarioParameters.ElementAt(i).Item3.Add
+                                    ("fishing", new Tuple<string, double, double>(pair[0], Convert.ToDouble(pair[1]), -999));
+                            }
+                            else
+                            {
+                                _scenarioParameters.ElementAt(i).Item3.Add
+                                    ("fishing", new Tuple<string, double, double>(pair[0], -999, -999));
+
+                            }
+                        }
+                        break;
                     case "harvesting":
                         // Loop over scenarios and exract the harvesting parameters for each
                         for (int i = 0; i < _scenarioNumber; i++)
