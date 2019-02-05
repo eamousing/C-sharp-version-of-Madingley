@@ -234,6 +234,10 @@ namespace Madingley
             tempVector[0] = lonIndex;
             _CellEnvironment.Add("LonIndex", tempVector);
 
+            // Add a fishing deficit vector to the grid cell
+            tempVector = new double[1];
+            tempVector[0] = 0.0;
+            _CellEnvironment.Add("FishingDeficit", tempVector);
 
             // Add the missing value of data in the grid cell to the cell environment
             tempVector = new double[1];
@@ -246,16 +250,33 @@ namespace Madingley
             // Loop over variables in the list of environmental data
             foreach (string LayerName in dataLayers.Keys)
             {
-                // Initiliase the temporary vector of values to be equal to the number of time intervals in the environmental variable
+                // Initilise the temporary vector of values to be equal to the number of time intervals in the environmental variable
                 tempVector = new double[dataLayers[LayerName].NumTimes];
-                // Loop over the time intervals in the environmental variable
-                for (int hh = 0; hh < dataLayers[LayerName].NumTimes; hh++)
+
+                // Need to sum values of catch
+                if ((LayerName == "SmallEctoCatch") || (LayerName == "MedEctoCatch") || (LayerName == "LgEctoCatch") || (LayerName == "CarnivoreCatch"))
                 {
-                    // Add the value of the environmental variable at this time interval to the temporary vector
-                    tempVector[hh] = dataLayers[LayerName].GetValue(_Latitude, _Longitude, (uint)hh, out EnviroMissingValue,latCellSize,lonCellSize);
-                    // If the environmental variable is a missing value, then change the value to equal the standard missing value for this cell
-                    if (EnviroMissingValue)
-                        tempVector[hh] = missingValue;
+                    {   // Loop over the time intervals in the environmental variable
+                        for (int hh = 0; hh < dataLayers[LayerName].NumTimes; hh++)
+                        {
+                            // Add the value of the environmental variable at this time interval to the temporary vector
+                            tempVector[hh] = dataLayers[LayerName].GetValue(_Latitude, _Longitude, (uint)hh, out EnviroMissingValue, latCellSize, lonCellSize, false, dataLayers[LayerName].LatStep, dataLayers[LayerName].LonStep);
+                            // If the environmental variable is a missing value, then change the value to equal the standard missing value for this cell
+                            if (EnviroMissingValue)
+                                tempVector[hh] = missingValue;
+                        }
+                    }
+                    // Otherwise average values of environmental variables
+                } else
+                {   // Loop over the time intervals in the environmental variable
+                    for (int hh = 0; hh < dataLayers[LayerName].NumTimes; hh++)
+                    {
+                        // Add the value of the environmental variable at this time interval to the temporary vector
+                        tempVector[hh] = dataLayers[LayerName].GetValue(_Latitude, _Longitude, (uint)hh, out EnviroMissingValue, latCellSize, lonCellSize);
+                        // If the environmental variable is a missing value, then change the value to equal the standard missing value for this cell
+                        if (EnviroMissingValue)
+                            tempVector[hh] = missingValue;
+                    }
                 }
                 // Add the values of the environmental variables to the cell environment, with the name of the variable as the key
                 _CellEnvironment.Add(LayerName, tempVector);

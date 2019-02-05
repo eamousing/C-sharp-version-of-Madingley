@@ -124,6 +124,7 @@ namespace Madingley
         private double[,] HANPP;
         private double[,] FrostDays;
         private double[,] Temperature;
+        private double[,] ExcessUnmetFishing;
 
         private double[,] FracEvergreen;
         
@@ -263,7 +264,7 @@ namespace Madingley
 
             //GridOutputArray = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells, numTimeSteps];
 
-            // Add output variables that are dimensioned geographically and temporally to grid output file
+            // Add output variables that are dimensioned geographically and temporally to grid outC:\Users\derekt\Work\Research\Erik\C-sharp-version-of-Madingley\Madingley\input\Data\Original\Ocean\averaged_SST_50y_top100m_monthly.ncput file
             string[] GeographicalDimensions = { "Latitude", "Longitude", "Time step" };
             DataConverter.AddVariable(GridOutput, "Biomass density", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "Abundance density", 3, GeographicalDimensions, 0, outLats, outLons, TimeSteps);
@@ -279,6 +280,7 @@ namespace Madingley
             Realm = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             HANPP = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             Temperature = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            ExcessUnmetFishing = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
 
             // Temporary outputs for checking plant model
             DataConverter.AddVariable(GridOutput, "Fraction year frost", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
@@ -286,6 +288,7 @@ namespace Madingley
             DataConverter.AddVariable(GridOutput, "Realm", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "HANPP", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "Temperature", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "ExcessUnmetFishing", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
 
             // Set up outputs for medium or high output levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
@@ -489,10 +492,11 @@ namespace Madingley
 
             HANPP = ecosystemModelGrid.GetEnviroGrid("HANPP", 0);
             Temperature = ecosystemModelGrid.GetEnviroGrid("Temperature", currentMonth);
+            ExcessUnmetFishing = ecosystemModelGrid.GetEnviroGrid("FishingDeficit", 0);
 
             double[] Timings = new double[10];
             
-            if ((OutputMetrics) && (currentTimeStep >= initialisation.TimeStepToStartProcessTrackers))
+            if ((OutputMetrics))// && (currentTimeStep >= initialisation.TimeStepToStartProcessTrackers))
             {
                 //Calculate the values for the ecosystem metrics for each of the grid cells
                 for (int i = 0; i < cellIndices.Count; i++)
@@ -642,6 +646,9 @@ namespace Madingley
             DataConverter.Array2DToSDS3D(Temperature, "Temperature", new string[] { "Latitude", "Longitude", "Time step" },
                 0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
 
+            DataConverter.Array2DToSDS3D(ExcessUnmetFishing, "ExcessUnmetFishing", new string[] { "Latitude", "Longitude", "Time step" },
+                0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
+
             // File outputs for medium and high detail levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
             {
@@ -696,7 +703,7 @@ namespace Madingley
             stockFunctionalGroupDefinitions, List<uint[]> cellIndices, uint currentTimeStep, MadingleyModelInitialisation initialisation,uint currentMonth)
         {
 
-            Console.WriteLine("Calculting metrics");
+            Console.WriteLine("Calculating metrics");
             MetricsTimer.Start();
 
             // Calculate the output variables for this time step
@@ -735,7 +742,8 @@ namespace Madingley
                 (int)currentTimeStep + 1, ecosystemModelGrid.GlobalMissingValue, GridOutput);
             DataConverter.Array2DToSDS3D(Temperature, "Temperature", new string[] { "Latitude", "Longitude", "Time step" },
                 (int)currentTimeStep + 1, ecosystemModelGrid.GlobalMissingValue, GridOutput);
-
+            DataConverter.Array2DToSDS3D(ExcessUnmetFishing, "ExcessUnmetFishing", new string[] { "Latitude", "Longitude", "Time step" },
+                0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
 
 
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
