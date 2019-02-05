@@ -110,6 +110,15 @@ namespace Madingley
         }
 
         /// <summary>
+        /// Used for adding stocks to a list
+        /// </summary>
+        /// <param name="item"></param>
+        public void Add(int fg, Stock item)
+        {
+            GridCellStocks[fg].Add(item);
+        }
+
+        /// <summary>
         /// NOT CURRENTLY USED
         /// </summary>
         public void Clear()

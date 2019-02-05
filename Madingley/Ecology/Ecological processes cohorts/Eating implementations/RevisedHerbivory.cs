@@ -246,7 +246,7 @@ namespace Madingley
         /// <param name="herbivoreIndividualMass">The individual body mass of the acting (herbivore) cohort</param>
         /// <returns>The potential biomass eaten by the herbivore cohort</returns>
         private double CalculatePotentialBiomassEatenMarine(double autotrophBiomass, double herbivoreIndividualMass,
-            double logOptimalPreyPredatorMassRatio, string cohortPhytoType, double temperature, Tuple<double, double> regCoefs)
+            double logOptimalPreyPredatorMassRatio, string cohortPhytoType)//, double temperature, Tuple<double, double> regCoefs, double[] BinCentres, double[] BiomassSizeStructure
         {
             // Calculate the inidividual herbivory rate per unit autotroph mass-density per hectare
             double IndividualHerbivoryRate = CalculateIndividualHerbivoryRatePerHectareMarine(herbivoreIndividualMass,
@@ -257,15 +257,18 @@ namespace Madingley
             double optPreySize = optPreyPredatorMassRatio * herbivoreIndividualMass;
 
             // Calculate proportion of NPP available to the cohort
-            double propAvailableNPP = 0.0;
+/*            double propAvailableNPP = 0.0;
             propAvailableNPP = regCoefs.Item2 * Math.Log10(optPreySize) + regCoefs.Item1;
             propAvailableNPP = Math.Pow(10, propAvailableNPP);
             
             // Adjust total NPP by the proportion available
             double autotrophBiomassBin = autotrophBiomass * propAvailableNPP;
+ */
+
+            
 
             // Calculate autotroph biomass density per hectare
-            double AutotrophBiomassDensity = autotrophBiomassBin / _CellAreaHectares;
+            double AutotrophBiomassDensity = autotrophBiomass / _CellAreaHectares;//autotrophBiomassBin / _CellAreaHectares;
 
             // Calculate the expected autotroph biomass eaten
             return IndividualHerbivoryRate * Math.Pow(AutotrophBiomassDensity, _AttackRateExponentMarine);

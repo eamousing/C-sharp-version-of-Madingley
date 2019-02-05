@@ -451,8 +451,24 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
                         // Calculate predicted leaf mass at equilibrium for this stock
                         double LeafMass = PlantModel.CalculateEquilibriumLeafMass(cellEnvironment, functionalGroups.GetTraitNames("leaf strategy", FunctionalGroup) == "deciduous");
 
+
+                        double InitialFractionalArea = 0.0;
+                        if (functionalGroups.GetTraitNames("impact state", FunctionalGroup).Equals("primary"))
+                        {
+                            InitialFractionalArea = cellEnvironment["Fprimary"][0];
+                        }
+                        else if (functionalGroups.GetTraitNames("impact state", FunctionalGroup).Equals("secondary"))
+                        {
+                            InitialFractionalArea = cellEnvironment["Fsecondary"][0];
+                        }
+                        else
+                        {
+                            //All HANPPlc comes from impacted lands
+                            InitialFractionalArea = 1 - (cellEnvironment["Fprimary"][0] + cellEnvironment["Fsecondary"][0]);
+                        }
+
                         // Initialise the new stock with the relevant properties
-                        NewStock = new Stock((byte)FunctionalGroup, IndividualMass[FunctionalGroup], LeafMass, functionalGroups.GetTraitNames("Stock name", FunctionalGroup));
+                        NewStock = new Stock((byte)FunctionalGroup, IndividualMass[FunctionalGroup], LeafMass,InitialFractionalArea, functionalGroups.GetTraitNames("Stock name", FunctionalGroup));
 
                         // Add the new stock to the list of grid cell stocks
                         gridCellStocks[FunctionalGroup].Add(NewStock);
@@ -464,8 +480,37 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
                     }
                     else if (FunctionalGroupsToUse.Contains(FunctionalGroup))
                     {
+
+                        double TotalPhytoBiomass = 1E12;
+
                         // Initialise the new stock with the relevant properties
-                        NewStock = new Stock((byte)FunctionalGroup, IndividualMass[FunctionalGroup], 1e12, functionalGroups.GetTraitNames("Stock name", FunctionalGroup));
+                        NewStock = new Stock((byte)FunctionalGroup, IndividualMass[FunctionalGroup], TotalPhytoBiomass, 1.0, functionalGroups.GetTraitNames("Stock name", FunctionalGroup));
+                        // Get current temperature in grid cell
+                        double temperature = cellEnvironment["Temperature"][0];
+
+                        // Calculate the coefficients for phytoplankton abundance-size curve
+                        double no3 = cellEnvironment["no3"][0];
+
+                        AutotrophProcessor a = new AutotrophProcessor();
+
+                        double[] BinEdges = new double[10];
+                        double[] BinCentres = new double[BinEdges.Length];
+                        int b = 0;
+                        for (double i = -8; i < 0; i++, b++)
+                        {
+                            BinEdges[b] = Math.Log10(0.5 * Math.Pow(10.0, i));
+                        }
+                        b = 0;
+                        for (int i = -9; i < -1; i++)
+                        {
+                            BinCentres[b] = i;
+                        }
+
+                        double[] NSFCentres = a.GetPhytoDistributionEnvironment(temperature, no3, BinEdges, BinCentres);
+
+                        for (b = 0; b < NSFCentres.Length; b++) NSFCentres[b] = TotalPhytoBiomass * NSFCentres[b];
+
+                        NewStock.SetSizeDistribution(BinCentres, BinEdges, NSFCentres);
 
                         // Add the new stock to the list of grid cell stocks
                         gridCellStocks[FunctionalGroup].Add(NewStock);

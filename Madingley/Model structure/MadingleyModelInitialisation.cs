@@ -605,6 +605,13 @@ namespace Madingley
             set { _ModelStateFilename = value; }
         }
 
+        private List<string> _ModelStateType;
+        public List<string> ModelStateType
+        {
+            get { return _ModelStateType; }
+            set { _ModelStateType = value; }
+        }
+
         private uint _NumYearsToRunProcessTrackers;
 
         public uint NumYearsToRunProcessTrackers

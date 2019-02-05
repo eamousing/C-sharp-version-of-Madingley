@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using MathNet.Numerics;
 
 namespace Madingley
 {
@@ -49,6 +50,67 @@ namespace Madingley
         }
 
         /// <summary>
+        /// Calculate coefficients for the abundance-size slope
+        /// </summary>
+        /// <param name="temperature"></param>
+        /// <param name="no3"></param>
+        /// <returns></returns>
+        public Tuple<double, double> GetPhytoAbundSizeSlope(double temperature, double no3)
+        {
+            double[] phyto = new double[3];
+            double[] nsfPhyto = new double[3];
+            double[] phytoSize = new double[3] { Math.Log10(1E-7), Math.Log10(1E-5), Math.Log10(1E-3) };
+            double[] regCoefs = new double[2];
+
+            phyto[0] = 1.145 - 0.021 * no3 - 6.936E-6 * temperature;
+            phyto[1] = 1.146 + 0.013 * no3 - 0.064 * temperature;
+            phyto[2] = 0.804 - 0.002 * no3 - 0.077 * temperature;
+            nsfPhyto[0] = Math.Log10(Math.Exp(phyto[0]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
+            nsfPhyto[1] = Math.Log10(Math.Exp(phyto[1]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
+            nsfPhyto[2] = Math.Log10(Math.Exp(phyto[2]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
+
+            Tuple<double, double> linReg = Fit.Line(phytoSize, nsfPhyto);
+            regCoefs[0] = linReg.Item1; // intercept
+            regCoefs[1] = linReg.Item2; // regression coefficient
+            return Tuple.Create(regCoefs[0], regCoefs[1]);
+        }
+
+
+        public double[] GetPhytoDistributionEnvironment(double temperature, double no3,double[] BinEdges,
+            double[] BinCentres)
+        {
+            Tuple<double, double> regCoefs = GetPhytoAbundSizeSlope(temperature, no3);
+
+            double[] NsfEdges = new double[BinEdges.Length];
+            double[] NsfCentres = new double[BinCentres.Length];
+
+            int b = 0;
+            for (double i = -8; i < 0; i++, b++)
+            {
+                NsfEdges[b] = Math.Pow(10, regCoefs.Item2 * BinEdges[b] + regCoefs.Item1);
+            }
+
+            //Calculate the mean NSF value (in log space) because bins are uniform and 
+            b = 0;
+            for (int i =-9; i <-1; i++)
+            {
+                NsfCentres[b] = (NsfEdges[b] + NsfEdges[b + 1]) / 2.0;
+            }
+
+            //Normalise so that the sum of Nsf centres = 1
+            double TotalNsf = NsfCentres.Sum();
+
+            for (b = 0; b < NsfCentres.Length; b++)
+            {
+                NsfCentres[b] = NsfCentres[b] / TotalNsf;
+            }
+
+            return NsfCentres;
+        }
+
+
+        
+        /// <summary>
         /// Convert NPP estimate into biomass of an autotroph stock
         /// </summary>
         /// <param name="cellEnvironment">The environment of the current grid cell</param>
@@ -63,7 +125,7 @@ namespace Madingley
         /// <param name="outputDetail">The level of output detail to use for the outputs</param>
         /// <param name="specificLocations">Whether the model is being run for specific locations</param>
         /// <param name="currentMonth">The current month in the model run</param>
-        public void ConvertNPPToAutotroph(FunctionalGroupDefinitions cohortDefinitions, FunctionalGroupDefinitions stockDefinitions,
+        public double ConvertNPPToAutotroph(FunctionalGroupDefinitions cohortDefinitions, FunctionalGroupDefinitions stockDefinitions,
             SortedList<string,double[]> cellEnvironment, GridCellStockHandler gridCellStockHandler, int[] 
             actingStock, string terrestrialNPPUnits, string oceanicNPPUnits, uint currentTimestep, string GlobalModelTimeStepUnit,
             ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, GlobalProcessTracker globalTracker, string outputDetail, bool specificLocations,uint currentMonth)
@@ -104,30 +166,7 @@ namespace Madingley
 
                 // Finally convert to g/cell/month and add to the stock totalbiomass
                 NPP *= Utilities.ConvertTimeUnits(GlobalModelTimeStepUnit, "day");
-                gridCellStockHandler[actingStock].TotalBiomass += NPP;
-
-                if (trackProcesses.TrackProcesses && (outputDetail == "high") && specificLocations)
-                {
-                    trackProcesses.TrackPrimaryProductionTrophicFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
-                        NPP);
-                }
-
-                if (trackProcesses.TrackProcesses)
-                {
-                    functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
-                        stockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", NPP, 
-                        cellEnvironment["Realm"][0] == 2.0);
-                }
-
-                if (globalTracker.TrackProcesses)
-                {
-                    globalTracker.RecordNPP((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0], (uint)actingStock[0],
-                            NPP / cellEnvironment["Cell Area"][0]);
-                }
-
-                // If the biomass of the autotroph stock has been made less than zero (i.e. because of negative NPP) then reset to zero
-                if (gridCellStockHandler[actingStock].TotalBiomass < 0.0)
-                    gridCellStockHandler[actingStock].TotalBiomass = 0.0;
+                
             }
 
             // Else if neither on land or in the ocean
@@ -138,6 +177,8 @@ namespace Madingley
                 gridCellStockHandler[actingStock].TotalBiomass = 0.0;
             }
             Debug.Assert(gridCellStockHandler[actingStock].TotalBiomass >= 0.0, "stock negative");
+
+            return NPP;
         }
     }
 }

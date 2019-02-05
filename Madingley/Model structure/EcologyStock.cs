@@ -73,9 +73,51 @@ namespace Madingley
         {
             if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
             {
+
+                
                 // Run the autotroph processor
-                MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"], 
-                    environmentalDataUnits["OceanNPP"], currentTimeStep,globalModelTimeStepUnit,tracker, functionalTracker, globalTracker ,outputDetail,specificLocations,currentMonth);
+                double NPP = MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"],
+                     environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, functionalTracker, globalTracker, outputDetail, specificLocations, currentMonth);
+
+
+                gridCellStocks[actingStock].TotalBiomass += NPP;
+
+
+                //Update the phytoplankton size distribution
+                double[] NSFPhytoDist = MarineNPPtoAutotrophStock.GetPhytoDistributionEnvironment(cellEnvironment["Temperature"][currentMonth],
+                    cellEnvironment["no3"][currentMonth], gridCellStocks[actingStock].SizeBinEdges, gridCellStocks[actingStock].SizeBinCentres);
+
+                //Add this new production to the mass distribution
+                for (int b = 0; b < NSFPhytoDist.Length; b++) gridCellStocks[actingStock].SizeStructure[b] += NPP * NSFPhytoDist[b];
+
+                if (tracker.TrackProcesses && (outputDetail == "high") && specificLocations)
+                {
+                    tracker.TrackPrimaryProductionTrophicFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
+                        NPP);
+                }
+
+                if (tracker.TrackProcesses)
+                {
+                    functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
+                        madingleyStockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", NPP,
+                        cellEnvironment["Realm"][0] == 2.0);
+                }
+
+                if (globalTracker.TrackProcesses)
+                {
+                    globalTracker.RecordNPP((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0], (uint)actingStock[0],
+                            NPP / cellEnvironment["Cell Area"][0]);
+                }
+
+                // If the biomass of the autotroph stock has been made less than zero (i.e. because of negative NPP) then reset to zero
+                if (gridCellStocks[actingStock].TotalBiomass < 0.0)
+                    gridCellStocks[actingStock].TotalBiomass = 0.0;
+
+
+
+
+
+
             }
             else if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "terrestrial")
             {

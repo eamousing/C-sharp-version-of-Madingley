@@ -127,8 +127,14 @@ namespace Madingley
         /// <param name="listOfCohorts">The list of cohorts to add</param>
         public void Add(List<Cohort> listOfCohorts)
         {
-            Debug.Fail("The model does not currently support the addition of functional groups");
+            //Debug.Fail("The model does not currently support the addition of functional groups");
             ((IList<List<Cohort>>)GridCellCohorts).Add(listOfCohorts);
+        }
+
+
+        public void Add(int fg, Cohort c)
+        {
+            GridCellCohorts[fg].Add(c);
         }
 
         /// <summary>

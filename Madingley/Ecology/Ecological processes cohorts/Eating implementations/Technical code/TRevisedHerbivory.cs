@@ -49,21 +49,21 @@ namespace Madingley
         /// <summary>
         /// Jagged array mirroring the grid cell stocks to store the biomasses eaten in herbivory
         /// </summary>
-        private double[][] _BiomassesEaten;
+        private double[][][] _BiomassesEaten;
         /// <summary>
         /// Get the jagged array storing the biomasses eaten in herbivory
         /// </summary>
-        public double[][] BiomassesEaten
+        public double[][][] BiomassesEaten
         { get { return _BiomassesEaten; } }
 
         /// <summary>
         /// Jagged array mirroring the grid cell stocks to store the potential biomasses eaten (given the rate of encounter) in herbivory
         /// </summary>
-        private double[][] _PotentialBiomassesEaten;
+        private double[][][] _PotentialBiomassesEaten;
         /// <summary>
         /// Get the jagged array storing the potential biomasses eaten in herbivory
         /// </summary>
-        public double[][] PotentialBiomassesEaten
+        public double[][][] PotentialBiomassesEaten
         { get { return _PotentialBiomassesEaten; } }
 
         /// <summary>
@@ -158,6 +158,10 @@ namespace Madingley
         /// </summary>
         private UtilityFunctions Utilities;
 
+
+        double _MaxdistanceOptimalPreyPredRatio = 0.7;
+
+
         /// <summary>
         /// Constructor for herbivory: assigns all parameter values
         /// </summary>
@@ -219,8 +223,8 @@ namespace Madingley
             _TimeUnitsToHandlePotentialFoodItems = 0.0;
 
             // Initialise the jagged arrays to hold the potential and actual biomass eaten in each of the grid cell autotroph stocks
-            _BiomassesEaten = new double[gridCellStocks.Count][];
-            _PotentialBiomassesEaten = new double[gridCellStocks.Count][];
+            _BiomassesEaten = new double[gridCellStocks.Count][][];
+            _PotentialBiomassesEaten = new double[gridCellStocks.Count][][];
 
             _AttackRateTemperatureScalar = 
                 (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
@@ -237,8 +241,13 @@ namespace Madingley
             // Loop over rows in the jagged arrays and initialise each vector
             for (int i = 0; i < gridCellStocks.Count; i++)
             {
-                _BiomassesEaten[i] = new double[gridCellStocks[i].Count];
-                _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count];
+                _BiomassesEaten[i] = new double[gridCellStocks[i].Count][];
+                _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count][];
+                for (int j = 0; j < gridCellStocks[i].Count; j++)
+                {
+                    _BiomassesEaten[i][j] = new double[1];
+                    _PotentialBiomassesEaten[i][j] = new double[1];
+                }
             }
 
             
@@ -253,40 +262,15 @@ namespace Madingley
                     EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass* 0.1;
 
                     // Calculate the potential biomass eaten from this stock by the acting cohort
-                    _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenTerrestrial(EdibleMass, _BodyMassHerbivore) * _AttackRateTemperatureScalar;
+                    _PotentialBiomassesEaten[FunctionalGroup][i][1] = CalculatePotentialBiomassEatenTerrestrial(EdibleMass, _BodyMassHerbivore) * _AttackRateTemperatureScalar;
 
                     // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
-                    _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i] *
+                    _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i][1] *
                         CalculateHandlingTimeTerrestrial(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
                     
                 }
             }
 
-        }
-        /// <summary>
-        /// Calculate coefficients for the abundance-size slope
-        /// </summary>
-        /// <param name="temperature"></param>
-        /// <param name="no3"></param>
-        /// <returns></returns>
-        public Tuple<double, double> GetPhytoAbundSizeSlope(double temperature, double no3)
-        {
-            double[] phyto = new double[3];
-            double[] nsfPhyto = new double[3];
-            double[] phytoSize = new double[3] { Math.Log10(1E-7), Math.Log10(1E-5), Math.Log10(1E-3) };
-            double[] regCoefs = new double[2];
-
-            phyto[0] = 1.145 - 0.021 * no3 - 6.936E-6 * temperature;
-            phyto[1] = 1.146 + 0.013 * no3 - 0.064 * temperature;
-            phyto[2] = 0.804 - 0.002 * no3 - 0.077 * temperature;
-            nsfPhyto[0] = Math.Log10(Math.Exp(phyto[0]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
-            nsfPhyto[1] = Math.Log10(Math.Exp(phyto[1]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
-            nsfPhyto[2] = Math.Log10(Math.Exp(phyto[2]) / (Math.Exp(phyto[0]) + Math.Exp(phyto[1]) + Math.Exp(phyto[2])));
-
-            Tuple<double, double> linReg = Fit.Line(phytoSize, nsfPhyto);
-            regCoefs[0] = linReg.Item1; // intercept
-            regCoefs[1] = linReg.Item2; // regression coefficient
-            return Tuple.Create(regCoefs[0], regCoefs[1]);
         }
 
         /// <summary>
@@ -312,7 +296,7 @@ namespace Madingley
             double no3 = cellEnvironment["no3"][currentMonth];
             double[] slopeCoefficient = new double[2];
 
-            Tuple<double, double> regCoefs = GetPhytoAbundSizeSlope(temperature, no3);
+            //Tuple<double, double> regCoefs = GetPhytoAbundSizeSlope(temperature, no3);
 
             // Get the individual body mass of the acting cohort
             _BodyMassHerbivore = gridCellCohorts[actingCohort].IndividualBodyMass;
@@ -321,8 +305,8 @@ namespace Madingley
             _TimeUnitsToHandlePotentialFoodItems = 0.0;
 
             // Initialise the jagged arrays to hold the potential and actual biomass eaten in each of the grid cell autotroph stocks
-            _BiomassesEaten = new double[gridCellStocks.Count][];
-            _PotentialBiomassesEaten = new double[gridCellStocks.Count][];
+            _BiomassesEaten = new double[gridCellStocks.Count][][];
+            _PotentialBiomassesEaten = new double[gridCellStocks.Count][][];
 
             _AttackRateTemperatureScalar =
                 (madingleyCohortDefinitions.GetTraitNames("Endo/Ectotherm", actingCohort[0]) == "ectotherm") ?
@@ -340,9 +324,14 @@ namespace Madingley
             // Loop over rows in the jagged arrays and initialise each vector
             for (int i = 0; i < gridCellStocks.Count; i++)
             {
-                _BiomassesEaten[i] = new double[gridCellStocks[i].Count];
-                _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count];
+                _BiomassesEaten[i] = new double[gridCellStocks[i].Count][];
+                _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count][];
             }
+
+            _HerbivoreLogOptimalPreyBodySizeRatio = gridCellCohorts[actingCohort[0]][actingCohort[1]].LogOptimalPreyBodySizeRatio;
+            //
+            double UpperHerbivirePreySizeWindow = Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(_MaxdistanceOptimalPreyPredRatio) ;
+            double LowerHerbivirePreySizeWindow = Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(-_MaxdistanceOptimalPreyPredRatio) ;
 
             // Loop over functional groups that can be eaten
             foreach (int FunctionalGroup in _FunctionalGroupIndicesToEat)
@@ -350,21 +339,39 @@ namespace Madingley
                 // Loop over stocks within the functional group
                 for (int i = 0; i < gridCellStocks[FunctionalGroup].Count; i++)
                 {
-                    // Get the mass from this stock that is available for eating (assumes all marine autotrophic organisms are edible)
+                    //Calculate the stock mass bins that this herbivore can eat from - assume that the herbivore has a window of biomass magnitude around the optimum
+                    var inds = Enumerable.Range(0,gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
+                        Where(b => (LowerHerbivirePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
+                            (UpperHerbivirePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
+
+                    //Now loop over these stock size bin inds
+                    foreach (var b in inds)
+                    {
+                        EdibleMass = gridCellStocks[FunctionalGroup][i].SizeStructure[b];
+
+                        _PhytoStockType = madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup);
+                        // Calculate the potential biomass eaten from this stock by the acting cohort
+                        _PotentialBiomassesEaten[FunctionalGroup][i][b] = CalculatePotentialBiomassEatenMarine(EdibleMass, _BodyMassHerbivore,
+                            _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType)*_AttackRateTemperatureScalar;
+
+                        // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
+                        _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i][b] *
+                            CalculateHandlingTimeMarine(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
+                    }
+/*                    // Get the mass from this stock that is available for eating (assumes all marine autotrophic organisms are edible)
                     //EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass * 0.1;
                     EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass;
-
-                    _HerbivoreLogOptimalPreyBodySizeRatio = gridCellCohorts[actingCohort[0]][actingCohort[1]].LogOptimalPreyBodySizeRatio;
 
                     _PhytoStockType = madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup);
                     // Calculate the potential biomass eaten from this stock by the acting cohort
                     _PotentialBiomassesEaten[FunctionalGroup][i] = CalculatePotentialBiomassEatenMarine(EdibleMass, _BodyMassHerbivore,
-                        _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType, temperature, regCoefs)*_AttackRateTemperatureScalar;
+                        _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType, temperature, regCoefs,
+                        gridCellStocks[FunctionalGroup][i].SizeBinCentres,gridCellStocks[FunctionalGroup][i].SizeStructure)*_AttackRateTemperatureScalar;
 
                     // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
                     _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i] *
                         CalculateHandlingTimeMarine(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
-
+*/
                 }
             }
 
@@ -400,19 +407,36 @@ namespace Madingley
                 // Loop over stocks within the functional groups
                 for (int i = 0; i < gridCellStocks[FunctionalGroup].Count; i++)
                 {
-                    // Get the mass from this stock that is available for eating (assumes only 10% is edible in the terrestrial realm)
-                    EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass * EdibleScaling;
+                    for (int b = 0; b < _BiomassesEaten[FunctionalGroup][i].Length; b++)
+                    {
+                        if (cellEnvironment["Realm"][0] == 2.0)
+                        {
+                            // Get the mass from this stock that is available for eating (assumes only 10% is edible in the terrestrial realm)
+                            EdibleMass = gridCellStocks[FunctionalGroup][i].SizeStructure[b] ;
+                        }
+                        else
+                        {
+                            EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass * EdibleScaling;
+                        }
 
-                    // Calculate the biomass actually eaten from this stock by the acting cohort
-                    _BiomassesEaten[FunctionalGroup][i] = CalculateBiomassesEaten(_PotentialBiomassesEaten[FunctionalGroup][i],
-                        _TimeUnitsToHandlePotentialFoodItems, gridCellCohorts[actingCohort].CohortAbundance, EdibleMass);
+                        // Calculate the biomass actually eaten from this stock by the acting cohort
+                        _BiomassesEaten[FunctionalGroup][i][b] = CalculateBiomassesEaten(_PotentialBiomassesEaten[FunctionalGroup][i][b],
+                            _TimeUnitsToHandlePotentialFoodItems, gridCellCohorts[actingCohort].CohortAbundance, EdibleMass);
 
-                    gridCellCohorts[actingCohort].TrophicIndex += _BiomassesEaten[FunctionalGroup][i];
+                        gridCellCohorts[actingCohort].TrophicIndex += _BiomassesEaten[FunctionalGroup][i][b];
 
-                    // Remove the biomass eaten from the autotroph stock
-                    gridCellStocks[FunctionalGroup][i].TotalBiomass -= _BiomassesEaten[FunctionalGroup][i];
+                        if (cellEnvironment["Realm"][0] == 2.0)
+                        {
+                            // Get the mass from this stock that is available for eating (assumes only 10% is edible in the terrestrial realm)
+                            gridCellStocks[FunctionalGroup][i].SizeStructure[b] -= _BiomassesEaten[FunctionalGroup][i][b];
+                        }
+                        else
+                        {
+                            // Remove the biomass eaten from the autotroph stock
+                            gridCellStocks[FunctionalGroup][i].TotalBiomass -= _BiomassesEaten[FunctionalGroup][i][b];
+                        }
 
-
+                    }
 
                     // If track processes has been specified, then track flow between primary producers and herbivores
                     if((trackProcesses.TrackProcesses) && (currentTimestep >= initialisation.TimeStepToStartProcessTrackers))
@@ -421,7 +445,7 @@ namespace Madingley
                         functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
                             madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
                             madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup),
-                            _BiomassesEaten[FunctionalGroup][i], cellEnvironment["Realm"][0] == 2.0);
+                            _BiomassesEaten[FunctionalGroup][i].Sum(), cellEnvironment["Realm"][0] == 2.0);
 
                     }
 
@@ -429,7 +453,7 @@ namespace Madingley
                     // primary producer and herbivore (this is the old tracker)
                     if (specificLocations && trackProcesses.TrackProcesses && (currentTimestep >= initialisation.TimeStepToStartProcessTrackers))
                     {
-                        trackProcesses.RecordHerbivoryMassFlow(currentTimestep, _BodyMassHerbivore, _BiomassesEaten[FunctionalGroup][i]);
+                        trackProcesses.RecordHerbivoryMassFlow(currentTimestep, _BodyMassHerbivore, _BiomassesEaten[FunctionalGroup][i].Sum());
                     }
 
                     // If track processes has been specified and the output detail level is set to high and the model is being run for specific locations,
@@ -437,7 +461,7 @@ namespace Madingley
                     if (trackProcesses.TrackProcesses && (outputDetail == "high") && specificLocations)
                     {
                         trackProcesses.TrackHerbivoryTrophicFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
-                            gridCellCohorts[actingCohort].FunctionalGroupIndex, madingleyCohortDefinitions, _BiomassesEaten[FunctionalGroup][i], _BodyMassHerbivore, initialisation, cellEnvironment["Realm"][0] == 2.0);
+                            gridCellCohorts[actingCohort].FunctionalGroupIndex, madingleyCohortDefinitions, _BiomassesEaten[FunctionalGroup][i].Sum(), _BodyMassHerbivore, initialisation, cellEnvironment["Realm"][0] == 2.0);
 
                     }
 
@@ -448,11 +472,12 @@ namespace Madingley
                     //    "Herbivory negative for this herbivore cohort" + actingCohort);
                     
                     // Add the biomass eaten and assimilated by an individual to the delta biomass for the acting cohort
-                    deltas["biomass"]["herbivory"] += _BiomassesEaten[FunctionalGroup][i] * AssimilationEfficiency / gridCellCohorts[actingCohort].CohortAbundance;
+                    deltas["biomass"]["herbivory"] += _BiomassesEaten[FunctionalGroup][i].Sum() * AssimilationEfficiency / gridCellCohorts[actingCohort].CohortAbundance;
 
                     // Move the biomass eaten but not assimilated by an individual into the organic matter pool
-                    deltas["organicpool"]["herbivory"] += _BiomassesEaten[FunctionalGroup][i] * (1 - AssimilationEfficiency);
+                    deltas["organicpool"]["herbivory"] += _BiomassesEaten[FunctionalGroup][i].Sum() * (1 - AssimilationEfficiency);
                 
+
                 }
 
                 // Check that the delta biomass from eating for the acting cohort is not negative
