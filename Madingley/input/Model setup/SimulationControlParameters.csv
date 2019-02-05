@@ -4,10 +4,10 @@ Length of simulation (years),200
 Burn-in (years),0
 Impact duration (years),0
 Recovery duration (years),0
-Top Latitude,25
-Bottom Latitude,15
-Leftmost Longitude,-45
-Rightmost Longitude,-35
+Top Latitude,60
+Bottom Latitude,59
+Leftmost Longitude,-40
+Rightmost Longitude,-39
 Grid Cell Size,1
 Read State,
 Specific Location File,SpecificLocations.csv
