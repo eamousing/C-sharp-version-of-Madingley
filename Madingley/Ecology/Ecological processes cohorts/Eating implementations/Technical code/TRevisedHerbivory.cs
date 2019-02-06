@@ -326,12 +326,17 @@ namespace Madingley
             {
                 _BiomassesEaten[i] = new double[gridCellStocks[i].Count][];
                 _PotentialBiomassesEaten[i] = new double[gridCellStocks[i].Count][];
+                for (int j = 0; j < gridCellStocks[i].Count; j++)
+                {
+                    _BiomassesEaten[i][j] = new double[gridCellStocks[i][j].SizeStructure.Length];
+                    _PotentialBiomassesEaten[i][j] = new double[gridCellStocks[i][j].SizeStructure.Length];
+                }
             }
 
             _HerbivoreLogOptimalPreyBodySizeRatio = gridCellCohorts[actingCohort[0]][actingCohort[1]].LogOptimalPreyBodySizeRatio;
             //
-            double UpperHerbivirePreySizeWindow = Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(_MaxdistanceOptimalPreyPredRatio) ;
-            double LowerHerbivirePreySizeWindow = Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(-_MaxdistanceOptimalPreyPredRatio) ;
+            double UpperHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(_MaxdistanceOptimalPreyPredRatio));
+            double LowerHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(-_MaxdistanceOptimalPreyPredRatio));
 
             // Loop over functional groups that can be eaten
             foreach (int FunctionalGroup in _FunctionalGroupIndicesToEat)
@@ -341,8 +346,8 @@ namespace Madingley
                 {
                     //Calculate the stock mass bins that this herbivore can eat from - assume that the herbivore has a window of biomass magnitude around the optimum
                     var inds = Enumerable.Range(0,gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
-                        Where(b => (LowerHerbivirePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
-                            (UpperHerbivirePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
+                        Where(b => (LowerHerbivorePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
+                            (UpperHerbivorePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
 
                     //Now loop over these stock size bin inds
                     foreach (var b in inds)

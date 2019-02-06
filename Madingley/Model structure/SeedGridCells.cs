@@ -494,14 +494,14 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
                         AutotrophProcessor a = new AutotrophProcessor();
 
                         double[] BinEdges = new double[10];
-                        double[] BinCentres = new double[BinEdges.Length];
+                        double[] BinCentres = new double[BinEdges.Length-1];
                         int b = 0;
-                        for (double i = -8; i < 0; i++, b++)
+                        for (double i = -9; i <= 0; i++, b++)
                         {
                             BinEdges[b] = Math.Log10(0.5 * Math.Pow(10.0, i));
                         }
                         b = 0;
-                        for (int i = -9; i < -1; i++)
+                        for (int i = -9; i <= -1; i++, b++)
                         {
                             BinCentres[b] = i;
                         }
