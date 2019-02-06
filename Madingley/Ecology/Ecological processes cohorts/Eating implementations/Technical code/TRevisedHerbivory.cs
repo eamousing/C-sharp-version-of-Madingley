@@ -434,6 +434,7 @@ namespace Madingley
                         {
                             // Get the mass from this stock that is available for eating (assumes only 10% is edible in the terrestrial realm)
                             gridCellStocks[FunctionalGroup][i].SizeStructure[b] -= _BiomassesEaten[FunctionalGroup][i][b];
+                            gridCellStocks[FunctionalGroup][i].TotalBiomass -= _BiomassesEaten[FunctionalGroup][i][b];
                         }
                         else
                         {
