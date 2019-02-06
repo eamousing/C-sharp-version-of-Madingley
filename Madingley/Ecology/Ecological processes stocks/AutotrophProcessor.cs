@@ -92,7 +92,7 @@ namespace Madingley
 
             //Calculate the mean NSF value (in log space) because bins are uniform and 
             b = 0;
-            for (int i =-9; i <-1; i++)
+            for (int i =-9; i <-1; i++,b++)
             {
                 NsfCentres[b] = (NsfEdges[b] + NsfEdges[b + 1]) / 2.0;
             }

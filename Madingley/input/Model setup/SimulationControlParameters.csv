@@ -16,7 +16,7 @@ Plankton size threshold,1
 Draw Randomly,yes
 Extinction Threshold,1
 Maximum Number Of Cohorts,1000
-Run Cells In Parallel,yes
+Run Cells In Parallel,no
 Run Simulations In Parallel,no
 Run Single Realm,
 Impact Cell Index,all
