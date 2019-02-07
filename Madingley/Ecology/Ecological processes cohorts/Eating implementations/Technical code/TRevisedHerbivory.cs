@@ -335,6 +335,7 @@ namespace Madingley
 
             _HerbivoreLogOptimalPreyBodySizeRatio = gridCellCohorts[actingCohort[0]][actingCohort[1]].LogOptimalPreyBodySizeRatio;
             //
+            double LogHerbivoreOptimatePreySize = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore);
             double UpperHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(_MaxdistanceOptimalPreyPredRatio));
             double LowerHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(-_MaxdistanceOptimalPreyPredRatio));
 
@@ -345,9 +346,14 @@ namespace Madingley
                 for (int i = 0; i < gridCellStocks[FunctionalGroup].Count; i++)
                 {
                     //Calculate the stock mass bins that this herbivore can eat from - assume that the herbivore has a window of biomass magnitude around the optimum
-                    var inds = Enumerable.Range(0,gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
-                        Where(b => (LowerHerbivorePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
-                            (UpperHerbivorePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
+                    //var inds = Enumerable.Range(0,gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
+                    //    Where(b => (LowerHerbivorePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
+                    //        (UpperHerbivorePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
+
+                    //Find the bin in which the optimal prey size fits
+                    var inds = Enumerable.Range(0, gridCellStocks[FunctionalGroup][i].SizeBinEdges.Length-1).
+                        Where(b => (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b] < LogHerbivoreOptimatePreySize) &&
+                            (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b+1] > LogHerbivoreOptimatePreySize));
 
                     //Now loop over these stock size bin inds
                     foreach (var b in inds)
