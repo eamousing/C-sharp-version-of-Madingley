@@ -84,23 +84,22 @@ namespace Madingley
             double[] NsfEdges = new double[BinEdges.Length];
             double[] NsfCentres = new double[BinCentres.Length];
 
-            int b = 0;
-            for (double i = -8; i < 0; i++, b++)
-            {
-                NsfEdges[b] = Math.Pow(10, regCoefs.Item2 * BinEdges[b] + regCoefs.Item1);
-            }
+            //int b = 0;
+            //for (double i = -8; i < 0; i++, b++)
+            //{
+            //    NsfEdges[b] = Math.Pow(10, regCoefs.Item2 * BinEdges[b] + regCoefs.Item1);
+            //}
 
             //Calculate the mean NSF value (in log space) because bins are uniform and 
-            b = 0;
-            for (int i =-9; i <-1; i++,b++)
+            for (int b =0; b <BinCentres.Length; b++)
             {
-                NsfCentres[b] = (NsfEdges[b] + NsfEdges[b + 1]) / 2.0;
+                NsfCentres[b] = Math.Pow(10, regCoefs.Item2 * BinCentres[b] + regCoefs.Item1);//(NsfEdges[b] + NsfEdges[b + 1]) / 2.0;
             }
 
             //Normalise so that the sum of Nsf centres = 1
             double TotalNsf = NsfCentres.Sum();
 
-            for (b = 0; b < NsfCentres.Length; b++)
+            for (int b = 0; b < NsfCentres.Length; b++)
             {
                 NsfCentres[b] = NsfCentres[b] / TotalNsf;
             }
