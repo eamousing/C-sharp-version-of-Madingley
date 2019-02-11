@@ -96,6 +96,15 @@ namespace Madingley
                         {
                             NumberOfCohortsInThisFunctionalGroup = functionalGroups.GetBiologicalPropertyOneFunctionalGroup("initial number of gridcellcohorts", FunctionalGroup);
                         }
+
+
+                        double MinFGMass = functionalGroups.GetBiologicalPropertyOneFunctionalGroup("minimum mass", FunctionalGroup);
+                        double MaxFGMass = functionalGroups.GetBiologicalPropertyOneFunctionalGroup("maximum mass", FunctionalGroup);
+
+                        int counter = 0;
+                        int CounterIncrementRange = (int)Math.Ceiling((int)NumberOfCohortsInThisFunctionalGroup / 10.0);
+                        double BasicJuveMinMass = MinFGMass;
+
                         for (int jj = 0; jj < NumberOfCohortsInThisFunctionalGroup; jj++)
                         {
                             // Check whether the model is set to randomly draw the body masses of new cohorts
@@ -106,15 +115,41 @@ namespace Madingley
                                 // Use the same seed for the random number generator every time
                                 RandomNumberGenerator.SetSeed((uint)(jj + 1), (uint)((jj + 1) * 3));
                             }
-                            // Draw adult mass from a log-normal distribution with mean -6.9 and standard deviation 10.0,
-                            // within the bounds of the minimum and maximum body masses for the functional group
-                            CohortAdultMass = Math.Pow(10, (RandomNumberGenerator.GetUniform() * (Math.Log10(MassMaxima[FunctionalGroup]) - Math.Log10(50 * MassMinima[FunctionalGroup])) + Math.Log10(50 * MassMinima[FunctionalGroup])));
+                            // Seeding works differently for small things
+                            if (MaxFGMass <= 1.01)
+                            {
+                                CohortJuvenileMass = BasicJuveMinMass + BasicJuveMinMass * counter * 4.0/10.0;
+                                counter++;
+
+                                if (counter == CounterIncrementRange)
+                                {
+                                    counter = 0;
+                                    BasicJuveMinMass = BasicJuveMinMass * 4.0;
+                                    if (BasicJuveMinMass > MaxFGMass)
+                                    {
+                                        BasicJuveMinMass = CohortJuvenileMass;
+                                        BasicJuveMinMass = BasicJuveMinMass + BasicJuveMinMass * 2.0 / 10.0;
+                                    }
+                                }
+
+                                // Draw adult mass from a log-normal distribution with mean -6.9 and standard deviation 10.0,
+                                // within the bounds of the minimum and maximum body masses for the functional group
+                                CohortAdultMass = Math.Pow(10, (RandomNumberGenerator.GetUniform() * (Math.Log10(MaxFGMass) - Math.Log10(50 * CohortJuvenileMass)) + Math.Log10(50 * CohortJuvenileMass)));
+                                
+                            }
+                            else
+                            {
+                                // Draw adult mass from a log-normal distribution with mean -6.9 and standard deviation 10.0,
+                                // within the bounds of the minimum and maximum body masses for the functional group
+                                CohortAdultMass = Math.Pow(10, (RandomNumberGenerator.GetUniform() * (Math.Log10(MassMaxima[FunctionalGroup]) - Math.Log10(50 * MassMinima[FunctionalGroup])) + Math.Log10(50 * MassMinima[FunctionalGroup])));
+
+                                // Calculate body mass ratios
+                                CalculateBodyMassRatios(out ExpectedLnAdultMassRatio, out CohortAdultMassRatio, out CohortJuvenileMass, ref cellEnvironment, CohortAdultMass, MassMinima[FunctionalGroup], RandomNumberGenerator);
+                            }
 
                             // Get optimal prey body size
                             double OptimalPreyBodySizeRatio = CalculateOptimalPreyBodySizeRatio(ref cellEnvironment, functionalGroups.GetTraitNames("Diet", FunctionalGroup) == "allspecial", RandomNumberGenerator);
 
-                            // Calculate body mass ratios
-                            CalculateBodyMassRatios(out ExpectedLnAdultMassRatio, out CohortAdultMassRatio, out CohortJuvenileMass, ref cellEnvironment, CohortAdultMass, MassMinima[FunctionalGroup], RandomNumberGenerator);
 
                             // Calculate cohort abundance
                             double NewBiomass;
