@@ -697,11 +697,14 @@ namespace Madingley
                                 madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
                                 madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup),
                                 (_AbundancesEaten[FunctionalGroup][i] * _BodyMassPrey), cellEnvironment["Realm"][0] == 2.0);
+                            if (initialisation.HighResSlowTrackingOn == true)
+                {
+                    highResFGTracker.RecordFGFlow(
+                        madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
+                        madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup), _BodyMassPredator, _BodyMassPrey,
+                        InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
+                }
 
-                            highResFGTracker.RecordFGFlow(
-                                madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
-                                madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup), _BodyMassPredator, _BodyMassPrey,
-                                InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
                         }
                         // If the model is being run for specific locations and if track processes has been specified, then track the mass flow between
                         // prey and predator

@@ -102,7 +102,8 @@ namespace Madingley
                         madingleyStockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", NPP,
                         cellEnvironment["Realm"][0] == 2.0);
                     highResFGTracker.RecordFGFlow(madingleyStockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", 0, 0, NPP, 0,
-    cellEnvironment["Realm"][0] == 2.0);
+                    cellEnvironment["Realm"][0] == 2.0);
+                    
                 }
 
                 if (globalTracker.TrackProcesses)

@@ -618,12 +618,12 @@ namespace Madingley
                         FGTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
                             EcosystemModelGrid.NumLonCells, initialisation,
                             EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
-
-
-                        HRFGTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
-                            EcosystemModelGrid.NumLonCells, initialisation,
-                            EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
-
+                        if (initialisation.HighResSlowTrackingOn)
+                        {
+                            HRFGTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
+                                EcosystemModelGrid.NumLonCells, initialisation,
+                                EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
+                        }
                         ACohortTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
                             EcosystemModelGrid.NumLonCells, initialisation, 
                             EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);

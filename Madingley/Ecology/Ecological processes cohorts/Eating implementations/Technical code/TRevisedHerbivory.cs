@@ -453,6 +453,17 @@ namespace Madingley
                             gridCellStocks[FunctionalGroup][i].TotalBiomass -= _BiomassesEaten[FunctionalGroup][i][b];
                         }
 
+                        // If track processes has been specified, then track flow between primary producers and herbivores
+                        if ((trackProcesses.TrackProcesses) && (initialisation.HighResSlowTrackingOn == true) && (currentTimestep >= initialisation.TimeStepToStartProcessTrackers))
+                        {
+                            // Track flows between functional groups
+                            highResFGTracker.RecordFGFlow(
+                                madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
+                                madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup), gridCellCohorts[actingCohort].IndividualBodyMass, 0,
+                                InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
+
+                        }
+
                     }
 
                     // If track processes has been specified, then track flow between primary producers and herbivores
@@ -463,11 +474,6 @@ namespace Madingley
                             madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
                             madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup),
                             _BiomassesEaten[FunctionalGroup][i].Sum(), cellEnvironment["Realm"][0] == 2.0);
-                        highResFGTracker.RecordFGFlow(
-                            madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
-                            madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup), gridCellCohorts[actingCohort].IndividualBodyMass, 0, 
-                            InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
-
                     }
 
                     // If the model is being run for specific locations and if track processes has been specified, then track the mass flow between

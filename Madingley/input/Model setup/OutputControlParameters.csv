@@ -20,5 +20,7 @@ Growth Filename,Growth
 Metabolism Filename,Metabolism
 NPP Output Filename,NPP
 Functional Group Flows Filename,FGFlows
-High Res Functional Group Flows Filename, HighResFGFlows
-Num Final Years to Track Individual Flows,40
+High Res Slow Tracking On, no
+High Res Functional Group Flows Filename, HRFGFlow
+Num Final Years to Track Individual Flows,1
+
