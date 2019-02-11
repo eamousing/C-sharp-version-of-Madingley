@@ -63,7 +63,7 @@ namespace Madingley
         public void RunEcologicalProcess(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, 
             int[] actingCohort, SortedList<string, double[]> cellEnvironment, Dictionary<string,Dictionary<string,double>> deltas , 
             FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions,
-            uint currentTimeStep, ProcessTracker processTracker, FunctionalGroupTracker functionalTracker, CohortTracker cohortTracker,
+            uint currentTimeStep, ProcessTracker processTracker, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker, CohortTracker cohortTracker,
             ref ThreadLockedParallelVariables partial, Boolean specificLocations, string outputDetail, uint currentMonth, MadingleyModelInitialisation initialisation)
         {
 

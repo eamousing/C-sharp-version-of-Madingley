@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using MathNet.Numerics;
-using System.Diagnostics;
 
 namespace Madingley
 {
@@ -158,6 +155,8 @@ namespace Madingley
         /// </summary>
         private UtilityFunctions Utilities;
 
+        double InitialAbundance;
+        double AbundanceEaten;
 
         double _MaxdistanceOptimalPreyPredRatio = 0.7;
 
@@ -405,7 +404,7 @@ namespace Madingley
         /// <param name="initialisation">The Madingley Model initialisation</param>
         public void RunEating(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, int[] actingCohort, SortedList<string, double[]>
             cellEnvironment, Dictionary<string, Dictionary<string, double>> deltas, FunctionalGroupDefinitions madingleyCohortDefinitions,
-            FunctionalGroupDefinitions madingleyStockDefinitions, ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, 
+            FunctionalGroupDefinitions madingleyStockDefinitions, ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker,
             CohortTracker cohortTracker, uint currentTimestep, Boolean specificLocations, string outputDetail, MadingleyModelInitialisation initialisation)
         {
 
@@ -434,7 +433,13 @@ namespace Madingley
                         _BiomassesEaten[FunctionalGroup][i][b] = CalculateBiomassesEaten(_PotentialBiomassesEaten[FunctionalGroup][i][b],
                             _TimeUnitsToHandlePotentialFoodItems, gridCellCohorts[actingCohort].CohortAbundance, EdibleMass);
 
+                        AbundanceEaten = _BiomassesEaten[FunctionalGroup][i][b];
+                        InitialAbundance = EdibleMass;
+
                         gridCellCohorts[actingCohort].TrophicIndex += _BiomassesEaten[FunctionalGroup][i][b];
+
+                        InitialAbundance = gridCellStocks[FunctionalGroup][i].SizeStructure[b];
+                        AbundanceEaten = _BiomassesEaten[FunctionalGroup][i][b];
 
                         if (cellEnvironment["Realm"][0] == 2.0)
                         {
@@ -458,6 +463,10 @@ namespace Madingley
                             madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
                             madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup),
                             _BiomassesEaten[FunctionalGroup][i].Sum(), cellEnvironment["Realm"][0] == 2.0);
+                        highResFGTracker.RecordFGFlow(
+                            madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
+                            madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup), gridCellCohorts[actingCohort].IndividualBodyMass, 0, 
+                            InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
 
                     }
 

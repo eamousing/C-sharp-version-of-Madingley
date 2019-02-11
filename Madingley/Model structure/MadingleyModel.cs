@@ -233,6 +233,12 @@ namespace Madingley
         private FunctionalGroupTracker FGTracker;
 
         /// <summary>
+        /// An instance of the high res group flows tracker
+        /// </summary>
+        /// 
+
+        private HighResFGTracker HRFGTracker;
+        /// <summary>
         /// An instance of the cohort tracker
         /// </summary>
         /// 
@@ -358,6 +364,9 @@ namespace Madingley
             // Instance a new functional group flows tracker
             FGTracker = new FunctionalGroupTracker(EcosystemModelGrid.Lats, EcosystemModelGrid.Lons, CohortFunctionalGroupDefinitions,
                 StockFunctionalGroupDefinitions, outputFilesSuffix, initialisation.OutputPath, initialisation.ProcessTrackingOutputs["FGFlowsOutput"]);
+
+            HRFGTracker = new HighResFGTracker(CohortFunctionalGroupDefinitions,
+                StockFunctionalGroupDefinitions, outputFilesSuffix, initialisation.OutputPath, initialisation.ProcessTrackingOutputs["HighResFGFlowsOutput"]);
 
             // Instantiate a new cohort tracker
             ACohortTracker = new CohortTracker(EcosystemModelGrid.Lats, EcosystemModelGrid.Lons, CohortFunctionalGroupDefinitions,
@@ -576,6 +585,7 @@ namespace Madingley
                         if(initialisation.TimeStepToStartProcessTrackers == hh)
                         {
                             FGTracker.OpenTrackerFile();
+                            HRFGTracker.OpenTrackerFile();
                             ACohortTracker.OpenTrackerFile();
                         }
                         
@@ -587,6 +597,7 @@ namespace Madingley
                     if(initialisation.TimeStepToStartProcessTrackers == hh)
                     {
                         FGTracker.OpenTrackerFile();
+                        HRFGTracker.OpenTrackerFile();
                         ACohortTracker.OpenTrackerFile();
                     }
                     
@@ -605,6 +616,11 @@ namespace Madingley
                     if(ProcessTrackers[i].TrackProcesses && (hh >= initialisation.TimeStepToStartProcessTrackers))
                     {
                         FGTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
+                            EcosystemModelGrid.NumLonCells, initialisation,
+                            EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
+
+
+                        HRFGTracker.WriteToTrackerFile(CurrentTimeStep, EcosystemModelGrid, EcosystemModelGrid.NumLatCells,
                             EcosystemModelGrid.NumLonCells, initialisation,
                             EcosystemModelGrid.GetEnviroLayer("Realm", 0, _CellList[i][0], _CellList[i][1], out varExists) == 2.0);
 
@@ -658,6 +674,8 @@ namespace Madingley
             if(initialisation.TrackProcesses)
             {
                 FGTracker.CloseTrackerFile();
+                HRFGTracker.CloseTrackerFile();
+                ACohortTracker.CloseTrackerFile();
             }
 
             // Write the final global outputs
@@ -1224,7 +1242,7 @@ namespace Madingley
                         latCellIndex, lonCellIndex), EnvironmentalDataUnits, _HumanNPPScenario, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                         CurrentTimeStep, NumBurninSteps, NumImpactSteps, initialisation.RecoveryTimeSteps, initialisation.InstantaneousTimeStep, initialisation.NumInstantaneousTimeStep, 
                         _GlobalModelTimeStepUnit, ProcessTrackers[cellIndex].TrackProcesses, ProcessTrackers[cellIndex],
-                        FGTracker, TrackGlobalProcesses, CurrentMonth,
+                        FGTracker, HRFGTracker, TrackGlobalProcesses, CurrentMonth,
                         InitialisationFileStrings["OutputDetail"], SpecificLocations, ((initialisation.ImpactCellIndices.Contains((uint)cellIndex) || (initialisation.ImpactAll))));
 
                 }
@@ -1350,7 +1368,7 @@ namespace Madingley
                         ActingCohort, EcosystemModelGrid.GetCellEnvironment(latCellIndex, lonCellIndex),
                         EcosystemModelGrid.GetCellDeltas(latCellIndex, lonCellIndex),
                         CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions, CurrentTimeStep,
-                        ProcessTrackers[cellIndex], FGTracker, ACohortTracker, ref partial, SpecificLocations, outputDetail, CurrentMonth, initialisation);
+                        ProcessTrackers[cellIndex], FGTracker, HRFGTracker, ACohortTracker, ref partial, SpecificLocations, outputDetail, CurrentMonth, initialisation);
 
                     // Update the properties of the acting cohort
                     MadingleyEcologyCohort.UpdateEcology(workingGridCellCohorts, workingGridCellStocks, ActingCohort,

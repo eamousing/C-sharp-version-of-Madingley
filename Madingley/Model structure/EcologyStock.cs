@@ -68,7 +68,7 @@ namespace Madingley
             SortedList<string, string> environmentalDataUnits, Tuple<string, double, double> humanNPPScenario,
             FunctionalGroupDefinitions madingleyCohortDefinitions, FunctionalGroupDefinitions madingleyStockDefinitions, 
             uint currentTimeStep, uint burninSteps, uint impactSteps,uint recoverySteps, uint instantStep, uint numInstantSteps, string globalModelTimeStepUnit, Boolean trackProcesses, 
-            ProcessTracker tracker, FunctionalGroupTracker functionalTracker, GlobalProcessTracker globalTracker, uint currentMonth, 
+            ProcessTracker tracker, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker, GlobalProcessTracker globalTracker, uint currentMonth, 
             string outputDetail, bool specificLocations, Boolean impactCell)
         {
             if (madingleyStockDefinitions.GetTraitNames("Realm", actingStock[0]) == "marine")
@@ -77,7 +77,7 @@ namespace Madingley
                 
                 // Run the autotroph processor
                 double NPP = MarineNPPtoAutotrophStock.ConvertNPPToAutotroph(madingleyCohortDefinitions, madingleyStockDefinitions, cellEnvironment, gridCellStocks, actingStock, environmentalDataUnits["LandNPP"],
-                     environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, functionalTracker, globalTracker, outputDetail, specificLocations, currentMonth);
+                     environmentalDataUnits["OceanNPP"], currentTimeStep, globalModelTimeStepUnit, tracker, functionalTracker, highResFGTracker, globalTracker, outputDetail, specificLocations, currentMonth);
 
 
                 gridCellStocks[actingStock].TotalBiomass += NPP;
@@ -101,6 +101,8 @@ namespace Madingley
                     functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
                         madingleyStockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", NPP,
                         cellEnvironment["Realm"][0] == 2.0);
+                    highResFGTracker.RecordFGFlow(madingleyStockDefinitions.GetTraitNames("stock name", actingStock[0]), "autotroph net production", 0, 0, NPP, 0,
+    cellEnvironment["Realm"][0] == 2.0);
                 }
 
                 if (globalTracker.TrackProcesses)
