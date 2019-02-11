@@ -1044,7 +1044,6 @@ namespace Madingley
                         }
                         break;
                     case "high res slow tracking on":
-
                         if (VarValues.GetValue(row).ToString() == "yes")
                         {
                             HighResSlowTrackingOn = true;
