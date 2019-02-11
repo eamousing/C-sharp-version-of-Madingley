@@ -425,6 +425,7 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
             {
                 NewAbund = NewBiomass / cohortJuvenileMass;
             }
+            NewAbund = NewAbund / 100.0;
             return NewAbund;
         }
 
