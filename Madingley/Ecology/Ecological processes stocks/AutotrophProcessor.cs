@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using MathNet.Numerics;
 
@@ -127,7 +126,7 @@ namespace Madingley
         public double ConvertNPPToAutotroph(FunctionalGroupDefinitions cohortDefinitions, FunctionalGroupDefinitions stockDefinitions,
             SortedList<string,double[]> cellEnvironment, GridCellStockHandler gridCellStockHandler, int[] 
             actingStock, string terrestrialNPPUnits, string oceanicNPPUnits, uint currentTimestep, string GlobalModelTimeStepUnit,
-            ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, GlobalProcessTracker globalTracker, string outputDetail, bool specificLocations,uint currentMonth)
+            ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker, GlobalProcessTracker globalTracker, string outputDetail, bool specificLocations,uint currentMonth)
         {
             double NPP = new double();
 

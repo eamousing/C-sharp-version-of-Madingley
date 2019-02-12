@@ -212,6 +212,9 @@ namespace Madingley
         // Temporary value to hold calculations
         private double TempDouble;
 
+        private double InitialAbundance;
+        private double AbundanceEaten;
+
         /// <summary>
         /// Instance of the class to perform general functions
         /// </summary>
@@ -629,15 +632,15 @@ namespace Madingley
         /// <param name="initialisation">The Madingley Model initialisation</param>
         public void RunEating(GridCellCohortHandler gridCellCohorts, GridCellStockHandler gridCellStocks, int[] actingCohort, SortedList<string, double[]>
             cellEnvironment, Dictionary<string, Dictionary<string, double>> deltas, FunctionalGroupDefinitions madingleyCohortDefinitions,
-            FunctionalGroupDefinitions madingleyStockDefinitions, ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, 
+            FunctionalGroupDefinitions madingleyStockDefinitions, ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker,
             CohortTracker cohortTracker, uint currentTimestep, Boolean specificLocations, string outputDetail, MadingleyModelInitialisation initialisation)
         {
             if (trackProcesses.TrackProcesses)
             {
                 Track = (RandomNumberGenerator.GetUniform() > 0.975) ? true : false;
             }
-            
 
+            _BodyMassPredator = gridCellCohorts[actingCohort].IndividualBodyMass;
             TempDouble = 0.0;
 
             // Temporary variable to hold the total time spent eating + 1. Saves an extra calculation in CalculateAbundanceEaten
@@ -655,8 +658,7 @@ namespace Madingley
 
                      // Calculate the actual abundance of prey eaten from this cohort
                     if (gridCellCohorts[FunctionalGroup][i].CohortAbundance > 0)
-                    {
-                     
+                    {                    
                         
                      // Calculate the actual abundance of prey eaten from this cohort
                     _AbundancesEaten[FunctionalGroup][i] = CalculateAbundanceEaten(_PotentialAbundanceEaten[FunctionalGroup][i], _PredatorAbundanceMultipliedByTimeEating,
@@ -665,6 +667,9 @@ namespace Madingley
                     }
                     else
                         _AbundancesEaten[FunctionalGroup][i] = 0;
+
+                    AbundanceEaten = AbundancesEaten[FunctionalGroup][i];
+                    InitialAbundance = gridCellCohorts[FunctionalGroup][i].CohortAbundance;
 
                     // Remove number of prey eaten from the prey cohort
                     gridCellCohorts[FunctionalGroup][i].CohortAbundance -= _AbundancesEaten[FunctionalGroup][i];
@@ -685,22 +690,33 @@ namespace Madingley
                                 gridCellCohorts[FunctionalGroup][i].CohortID[0], AbundancesEaten[FunctionalGroup][i], "predation");
                         }
 
-                        // Track flows between functional groups
-                        functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
-                            madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
-                            madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup),
-                            (_AbundancesEaten[FunctionalGroup][i] * _BodyMassPrey), cellEnvironment["Realm"][0] == 2.0);
+                        if (_AbundancesEaten[FunctionalGroup][i] > 0.0)
+                        {
+                            // Track flows between functional groups
+                            functionalTracker.RecordFGFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
+                                madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
+                                madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup),
+                                (_AbundancesEaten[FunctionalGroup][i] * _BodyMassPrey), cellEnvironment["Realm"][0] == 2.0);
+                            if (initialisation.HighResSlowTrackingOn == true)
+                {
+                    highResFGTracker.RecordFGFlow(
+                        madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
+                        madingleyCohortDefinitions.GetTraitNames("group description", FunctionalGroup), _BodyMassPredator, _BodyMassPrey,
+                        InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
+                }
 
-
+                        }
                         // If the model is being run for specific locations and if track processes has been specified, then track the mass flow between
                         // prey and predator
                         if (specificLocations)
                         {
+                            if (_AbundancesEaten[FunctionalGroup][i] > 0.0)
                             trackProcesses.RecordPredationMassFlow(currentTimestep, _BodyMassPrey, _BodyMassPredator, _BodyMassPrey *
                                 _AbundancesEaten[FunctionalGroup][i]);
                         
                         if (outputDetail == "high")
-                            trackProcesses.TrackPredationTrophicFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
+                                if (_AbundancesEaten[FunctionalGroup][i] > 0.0)
+                                    trackProcesses.TrackPredationTrophicFlow((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0],
                                 gridCellCohorts[FunctionalGroup][i].FunctionalGroupIndex, gridCellCohorts[actingCohort].FunctionalGroupIndex,
                                 madingleyCohortDefinitions, (_AbundancesEaten[FunctionalGroup][i] * _BodyMassPrey), _BodyMassPredator, _BodyMassPrey, 
                                 initialisation, cellEnvironment["Realm"][0] == 2.0);

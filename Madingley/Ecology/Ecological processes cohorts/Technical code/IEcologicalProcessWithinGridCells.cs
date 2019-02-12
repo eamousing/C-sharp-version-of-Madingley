@@ -38,6 +38,7 @@ namespace Madingley
             uint currentTimestep,
             ProcessTracker trackProcesses,
             FunctionalGroupTracker functionalTracker,
+            HighResFGTracker highResFGTracker,
             CohortTracker cohortTracker,
             ref ThreadLockedParallelVariables partial,
             Boolean specificLocations, string outputDetail, uint currentMonth, MadingleyModelInitialisation initialisation);

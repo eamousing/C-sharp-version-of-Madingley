@@ -116,7 +116,7 @@ namespace Madingley
             Dictionary<string, Dictionary<string, double>> deltas, 
             FunctionalGroupDefinitions madingleyCohortDefinitions, 
             FunctionalGroupDefinitions madingleyStockDefinitions, 
-            ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, CohortTracker cohortTracker,
+            ProcessTracker trackProcesses, FunctionalGroupTracker functionalTracker, HighResFGTracker highResFGTracker, CohortTracker cohortTracker,
             uint currentTimestep, Boolean specificLocations, string outputDetail, MadingleyModelInitialisation initialisation);
 
     }

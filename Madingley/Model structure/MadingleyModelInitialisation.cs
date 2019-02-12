@@ -431,6 +431,14 @@ namespace Madingley
             set { _TrackGlobalProcesses = value; }
         }
 
+        // Whether to do the high resolution functional group tracking. This is slow and produces very big files, so defaults to off
+        private Boolean _HighResSlowTrackingOn = false;
+        public Boolean HighResSlowTrackingOn
+        {
+            get { return _HighResSlowTrackingOn; }
+            set { _HighResSlowTrackingOn = value; }
+        }
+
         /// <summary>
         /// The paths and filenames for the diagnostics for the ecological processes
         /// </summary>
@@ -989,6 +997,9 @@ namespace Madingley
                     case "functional group flows filename":
                         _ProcessTrackingOutputs.Add("FGFlowsOutput", VarValues.GetValue(row).ToString());
                         break;
+                    case "high res functional group flows filename":
+                        _ProcessTrackingOutputs.Add("HighResFGFlowsOutput", VarValues.GetValue(row).ToString());
+                        break;
                     case "cohort flows filename":
                         _ProcessTrackingOutputs.Add("CohortFlowsOutput", VarValues.GetValue(row).ToString());
                         break;
@@ -1032,6 +1043,17 @@ namespace Madingley
                             }
                         }
                         break;
+                    case "high res slow tracking on":
+                        if (VarValues.GetValue(row).ToString() == "yes")
+                        {
+                            HighResSlowTrackingOn = true;
+                        }
+                        else
+                        {
+                            HighResSlowTrackingOn = false;
+                        }
+                        break;    
+                        
                     case "num final years to track individual flows":
 
                         if(VarValues.GetValue(row).ToString() != "")

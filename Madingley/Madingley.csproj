@@ -116,8 +116,9 @@
     <Reference Include="FetchClimate">
       <HintPath>References\FetchClimate.exe</HintPath>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=4.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.4.5.1\lib\net461\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MathNet.Numerics.4.7.0\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Ccr.Core, Version=2.2.76.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -248,6 +249,7 @@
     <Compile Include="Output and tracking\GlobalNPPTracker.cs" />
     <Compile Include="Output and tracking\GlobalProcessTracker.cs" />
     <Compile Include="Output and tracking\GrowthTracker.cs" />
+    <Compile Include="Output and tracking\HighResFGTracker.cs" />
     <Compile Include="Output and tracking\MetabolismTracker.cs" />
     <Compile Include="Output and tracking\MortalityTracker.cs" />
     <Compile Include="Output and tracking\OutputCell.cs" />
