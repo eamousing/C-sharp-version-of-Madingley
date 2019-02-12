@@ -158,7 +158,7 @@ namespace Madingley
         double InitialAbundance;
         double AbundanceEaten;
 
-        double _MaxdistanceOptimalPreyPredRatio = 0.7;
+        double _MaxdistanceOptimalPreyPredRatio = 0.9;
 
 
         /// <summary>
