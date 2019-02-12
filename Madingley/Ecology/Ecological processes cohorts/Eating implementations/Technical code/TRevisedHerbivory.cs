@@ -339,6 +339,9 @@ namespace Madingley
             double UpperHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(_MaxdistanceOptimalPreyPredRatio));
             double LowerHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * Math.Exp(-_MaxdistanceOptimalPreyPredRatio));
 
+            // Calculate the inidividual herbivory rate per unit autotroph mass-density per hectare
+            SpecificHerbivoreKillRateConstant = CalculateIndividualHerbivoryRatePerHectareMarine(_BodyMassHerbivore);
+
             // Loop over functional groups that can be eaten
             foreach (int FunctionalGroup in _FunctionalGroupIndicesToEat)
             {
@@ -346,14 +349,14 @@ namespace Madingley
                 for (int i = 0; i < gridCellStocks[FunctionalGroup].Count; i++)
                 {
                     //Calculate the stock mass bins that this herbivore can eat from - assume that the herbivore has a window of biomass magnitude around the optimum
-                    //var inds = Enumerable.Range(0,gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
-                    //    Where(b => (LowerHerbivorePreySizeWindow < gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]) && 
-                    //        (UpperHerbivorePreySizeWindow > gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]));
+                    var inds = Enumerable.Range(0, gridCellStocks[FunctionalGroup][i].SizeStructure.Length).
+                        Where(b => (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b] >= LowerHerbivorePreySizeWindow ) &&
+                            (gridCellStocks[FunctionalGroup][i].SizeBinCentres[b] <= UpperHerbivorePreySizeWindow));
 
                     //Find the bin in which the optimal prey size fits
-                    var inds = Enumerable.Range(0, gridCellStocks[FunctionalGroup][i].SizeBinEdges.Length-1).
-                        Where(b => (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b] < LogHerbivoreOptimatePreySize) &&
-                            (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b+1] > LogHerbivoreOptimatePreySize));
+                    //var inds = Enumerable.Range(0, gridCellStocks[FunctionalGroup][i].SizeBinEdges.Length-1).
+                    //    Where(b => (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b] < LogHerbivoreOptimatePreySize) &&
+                    //        (gridCellStocks[FunctionalGroup][i].SizeBinEdges[b+1] > LogHerbivoreOptimatePreySize));
 
                     //Now loop over these stock size bin inds
                     foreach (var b in inds)
@@ -362,12 +365,12 @@ namespace Madingley
 
                         _PhytoStockType = madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup);
                         // Calculate the potential biomass eaten from this stock by the acting cohort
-                        _PotentialBiomassesEaten[FunctionalGroup][i][b] = CalculatePotentialBiomassEatenMarine(EdibleMass, _BodyMassHerbivore,
+                        _PotentialBiomassesEaten[FunctionalGroup][i][b] = CalculatePotentialBiomassEatenMarine(EdibleMass, _BodyMassHerbivore,Math.Pow(10,gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]),
                             _HerbivoreLogOptimalPreyBodySizeRatio, _PhytoStockType)*_AttackRateTemperatureScalar;
 
                         // Add the time required to handle the potential biomass eaten from this stock to the cumulative total for all stocks
                         _TimeUnitsToHandlePotentialFoodItems += _PotentialBiomassesEaten[FunctionalGroup][i][b] *
-                            CalculateHandlingTimeMarine(_BodyMassHerbivore)*_HandlingTimeTemperatureScalar;
+                            CalculateHandlingTimeMarine(_BodyMassHerbivore, Math.Pow(10,gridCellStocks[FunctionalGroup][i].SizeBinCentres[b])) * _HandlingTimeTemperatureScalar;
                     }
 /*                    // Get the mass from this stock that is available for eating (assumes all marine autotrophic organisms are edible)
                     //EdibleMass = gridCellStocks[FunctionalGroup][i].TotalBiomass * 0.1;
