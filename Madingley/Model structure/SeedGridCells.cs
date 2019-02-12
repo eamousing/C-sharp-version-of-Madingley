@@ -528,18 +528,37 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
 
                         AutotrophProcessor a = new AutotrophProcessor();
 
-                        double[] BinEdges = new double[10];
+                        double[] BinEdges = new double[60];
                         double[] BinCentres = new double[BinEdges.Length-1];
                         int b = 0;
-                        for (double i = -9; i <= 0; i++, b++)
+                        for (double i = -11; i <= 0; i++)
                         {
-                            BinEdges[b] = Math.Log10(0.5 * Math.Pow(10.0, i));
+                            //BinEdges[b] = Math.Log10(0.5 * Math.Pow(10.0, i));
+                            for (double s = 2; s <= 10; s+=2.0 )
+                                BinEdges[b++] = ((s/10) * Math.Pow(10.0, i));
                         }
                         b = 0;
-                        for (int i = -9; i <= -1; i++, b++)
+                        for (int i = 0; i < BinEdges.Length-1; i++ )
                         {
-                            BinCentres[b] = i;
+                           
+                                BinCentres[b++] = (BinEdges[i] + BinEdges[i+1])/2.0;
                         }
+
+                        for (int i = 0; i < BinEdges.Length; i++)
+                        {
+                            BinEdges[i] = Math.Log10(BinEdges[i]);
+                        }
+
+                        for (int i = 0; i < BinCentres.Length; i++)
+                        {
+                            BinCentres[i] = Math.Log10(BinCentres[i]);
+                        }
+
+                        //b = 0;
+                        //for (int i = -9; i <= -1; i++, b++)
+                        //{
+                        //    BinCentres[b] = i;
+                        //}
 
                         double[] NSFCentres = a.GetPhytoDistributionEnvironment(temperature, no3, BinEdges, BinCentres);
 
