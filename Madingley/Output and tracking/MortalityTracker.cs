@@ -147,7 +147,7 @@ namespace Madingley
 
             if (MortalityList.ContainsKey(CohortIDString))
             {
-                if (RandomNumberGenerator.GetUniform() > 0.0)
+                if (RandomNumberGenerator.GetUniform() > 0.95)
                 {
                     var Lines = ((IEnumerable)MortalityList[CohortIDString]).Cast<object>().ToList();
                     foreach (var Line in Lines)

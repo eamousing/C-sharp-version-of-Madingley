@@ -281,10 +281,10 @@ namespace Madingley
         /// <param name="metabolism">The mass lost to indivduals in the cohort through metabolism</param>
         /// <param name="predation">The mass gained by individuals in the cohort through predation</param>
         /// <param name="herbivory">The mass gained by individuals in the cohort through herbivory</param>
-        public void TrackTimestepGrowth(uint latIndex, uint lonIndex, uint timeStep, double currentBodyMass, 
+        public void TrackTimestepGrowth(uint latIndex, uint lonIndex, uint timeStep, double currentBodyMass, double adultBodyMass , double abundance,
             int functionalGroup, double netGrowth, double metabolism, double predation, double herbivory)
         {
-            _TrackGrowth.RecordGrowth(latIndex, lonIndex, timeStep, currentBodyMass, functionalGroup, netGrowth, metabolism, predation,herbivory);
+            _TrackGrowth.RecordGrowth(latIndex, lonIndex, timeStep, currentBodyMass, adultBodyMass, abundance, functionalGroup, netGrowth, metabolism, predation,herbivory);
         }
 
         /// <summary>
