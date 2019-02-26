@@ -94,7 +94,8 @@ namespace Madingley
                 // Calculate net growth of individuals in this cohort
                 double growth = deltaBiomass["predation"] + deltaBiomass["herbivory"] + deltaBiomass["metabolism"];
                 tracker.TrackTimestepGrowth((uint)cellEnvironment["LatIndex"][0], (uint)cellEnvironment["LonIndex"][0], currentTimestep,
-                    gridCellCohorts[actingCohort].IndividualBodyMass, gridCellCohorts[actingCohort].FunctionalGroupIndex, growth, deltaBiomass["metabolism"],deltaBiomass["predation"],deltaBiomass["herbivory"]);
+                    gridCellCohorts[actingCohort].IndividualBodyMass, gridCellCohorts[actingCohort].AdultMass, gridCellCohorts[actingCohort].CohortAbundance, 
+                    gridCellCohorts[actingCohort].FunctionalGroupIndex, growth, deltaBiomass["metabolism"],deltaBiomass["predation"],deltaBiomass["herbivory"]);
 
                 // Record metablic cost if necessary
                 cohortTracker.RecordMetabolicCost(deltas["biomass"]["metabolism"]);

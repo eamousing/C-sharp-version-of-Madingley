@@ -158,7 +158,7 @@ namespace Madingley
         double InitialAbundance;
         double AbundanceEaten;
 
-        double _MaxdistanceOptimalPreyPredRatio = 0.9;
+        double _MaxdistanceOptimalPreyPredRatio = 0.7;
 
 
         /// <summary>
@@ -462,7 +462,8 @@ namespace Madingley
                             // Track flows between functional groups
                             highResFGTracker.RecordFGFlow(
                                 madingleyCohortDefinitions.GetTraitNames("group description", gridCellCohorts[actingCohort].FunctionalGroupIndex),
-                                madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup), gridCellCohorts[actingCohort].IndividualBodyMass, 0,
+                                madingleyStockDefinitions.GetTraitNames("stock name", FunctionalGroup), gridCellCohorts[actingCohort].IndividualBodyMass,
+                                Math.Pow(10,gridCellStocks[FunctionalGroup][i].SizeBinCentres[b]),
                                 InitialAbundance, AbundanceEaten, cellEnvironment["Realm"][0] == 2.0);
 
                         }
