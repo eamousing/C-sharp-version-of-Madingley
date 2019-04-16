@@ -1,13 +1,13 @@
 DEFINITION_Heterotroph/Autotroph,DEFINITION_Nutrition source,DEFINITION_Diet,DEFINITION_Realm,DEFINITION_Mobility,DEFINITION_Reproductive strategy,DEFINITION_Endo/Ectotherm,PROPERTY_Herbivory assimilation,PROPERTY_Carnivory assimilation,PROPERTY_Proportion suitable time active,PROPERTY_Minimum mass,PROPERTY_Maximum mass,PROPERTY_Initial number of GridCellCohorts,DEFINITION_group description
-Heterotroph,Omnivore,All,Marine,Planktonic,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-09,1.00E-06,300,zooplankton v small it
+Heterotroph,Omnivore,All,Marine,Planktonic,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-10,1.00E-06,400,zooplankton v small it
 Heterotroph,Omnivore,All,Marine,Planktonic,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-07,1.00E-04,200,zooplankton small it
 Heterotroph,Omnivore,All,Marine,Planktonic,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-05,1.00E-02,100,zooplankton medium it
 Heterotroph,Omnivore,All,Marine,Planktonic,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-03,1.00E+00,100,zooplankton large it
-Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-05,300,100,Ecto omni small it
-Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-04,8500,100,Ecto omni medium it
-Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.8,0.5,1.00E-03,100000,100,Ecto omni large it
-Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Ectotherm,0,0.8,0.5,100,500000,100,Ecto carn it
-Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Endotherm,0,0.8,0.5,1000,5000000,100,Mammals carn
+Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.5,0.8,1.00E-05,300,100,Ecto omni small it
+Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.5,0.8,1.00E-04,8500,100,Ecto omni medium it
+Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.8,0.5,0.8,1.00E-03,100000,100,Ecto omni large it
+Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Ectotherm,0,0.8,0.8,100,500000,100,Ecto carn it
+Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Endotherm,0,0.8,0.8,1000,5000000,100,Mammals carn
 Heterotroph,Herbivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0.5,0,0.5,1.5,5000000,84,itHerbEndo
 Heterotroph,Carnivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0,0.8,0.5,3,700000,84,itCarnEndo
 Heterotroph,Omnivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0.4,0.64,0.5,3,1500000,84,itOmnEndo

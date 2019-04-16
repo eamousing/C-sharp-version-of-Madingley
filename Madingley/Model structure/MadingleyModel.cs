@@ -331,6 +331,8 @@ namespace Madingley
         // An instance of the direct harvesting impacts class
         Harvesting HarvestingSimulator;
 
+        int Simulation;
+
         /// <summary>
         /// Initializes the ecosystem model
         /// </summary>
@@ -360,6 +362,8 @@ namespace Madingley
 
             // Instance the array of process trackers
             ProcessTrackers = new ProcessTracker[_CellList.Count];
+
+            Simulation = simulation;
 
             // Instance a new functional group flows tracker
             FGTracker = new FunctionalGroupTracker(EcosystemModelGrid.Lats, EcosystemModelGrid.Lons, CohortFunctionalGroupDefinitions,
@@ -1410,6 +1414,20 @@ namespace Madingley
 
             // Write out the updated cohort numbers after all ecological processes have occured
             EcosystemModelGrid.SetGridCellCohorts(workingGridCellCohorts, latCellIndex, lonCellIndex);
+
+
+            //TESTING - Write out the phytoplankton size structure in this cell            
+            string path = initialisation.OutputPath + "/PhytoplanktonSizeStructure_"+ Simulation.ToString() +".csv";
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                string l = CurrentTimeStep.ToString();
+                for (int i = 0; i < workingGridCellStocks[0][0].SizeStructure.Length; i++)
+			    {
+                    l += "," + workingGridCellStocks[0][0].SizeStructure[i].ToString();
+			    }
+                sw.WriteLine(l);
+            }	
+
         }
 
         /// <summary>

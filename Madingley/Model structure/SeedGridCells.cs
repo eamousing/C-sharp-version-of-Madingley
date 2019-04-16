@@ -516,7 +516,7 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
                     else if (FunctionalGroupsToUse.Contains(FunctionalGroup))
                     {
 
-                        double TotalPhytoBiomass = 1E12;
+                        double TotalPhytoBiomass = 1E8;
 
                         // Initialise the new stock with the relevant properties
                         NewStock = new Stock((byte)FunctionalGroup, IndividualMass[FunctionalGroup], TotalPhytoBiomass, 1.0, functionalGroups.GetTraitNames("Stock name", FunctionalGroup));
@@ -528,10 +528,10 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
 
                         AutotrophProcessor a = new AutotrophProcessor();
 
-                        double[] BinEdges = new double[120];
+                        double[] BinEdges = new double[100];
                         double[] BinCentres = new double[BinEdges.Length-1];
                         int b = 0;
-                        for (double i = -11; i <= 0; i++)
+                        for (double i = -9; i <= 0; i++)
                         {
                             //BinEdges[b] = Math.Log10(0.5 * Math.Pow(10.0, i));
                             for (double s = 1; s <= 10; s+=1.0 )
@@ -561,7 +561,7 @@ Math.Pow(0.6, (Math.Log10(cohortJuvenileMass))) * (cellEnvironment["Cell Area"][
                         //}
 
                         double[] NSFCentres = a.GetPhytoDistributionEnvironment(temperature, no3, BinEdges, BinCentres);
-
+                        
                         for (b = 0; b < NSFCentres.Length; b++) NSFCentres[b] = TotalPhytoBiomass * NSFCentres[b];
 
                         NewStock.SetSizeDistribution(BinCentres, BinEdges, NSFCentres);

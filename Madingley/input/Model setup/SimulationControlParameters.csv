@@ -1,6 +1,6 @@
 Parameter,Value
 Timestep Units,Month
-Length of simulation (years),100
+Length of simulation (years),50
 Burn-in (years),0
 Impact duration (years),0
 Recovery duration (years),0
@@ -15,7 +15,7 @@ Locations to Track File,
 Plankton size threshold,1
 Draw Randomly,yes
 Extinction Threshold,1
-Maximum Number Of Cohorts,1200
+Maximum Number Of Cohorts,1300
 Run Cells In Parallel,no
 Run Simulations In Parallel,yes
 Run Single Realm,

@@ -87,6 +87,7 @@ namespace Madingley
                 double[] NSFPhytoDist = MarineNPPtoAutotrophStock.GetPhytoDistributionEnvironment(cellEnvironment["Temperature"][currentMonth],
                     cellEnvironment["no3"][currentMonth], gridCellStocks[actingStock].SizeBinEdges, gridCellStocks[actingStock].SizeBinCentres);
 
+                
                 //Add this new production to the mass distribution
                 for (int b = 0; b < NSFPhytoDist.Length; b++) gridCellStocks[actingStock].SizeStructure[b] += NPP * NSFPhytoDist[b];
 
