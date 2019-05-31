@@ -500,9 +500,9 @@ namespace Madingley
                     //Console.WriteLine(NextCohortID);
 
                     // Seed zooplankton each time step
-                    //EcosystemModelGrid.SeedGridCellStocksAndCohortsPerTimeStep(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
-                    //         GlobalDiagnosticVariables, ref NextCohortID, InitialisationFileStrings["OutputDetail"] == "high", DrawRandomly,
-                    //         initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel);
+                   // EcosystemModelGrid.SeedGridCellStocksAndCohortsPerTimeStep(_CellList, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                     //        GlobalDiagnosticVariables, ref NextCohortID, InitialisationFileStrings["OutputDetail"] == "high", DrawRandomly,
+                       //      initialisation.DispersalOnly, InitialisationFileStrings["DispersalOnlyType"], RunGridCellsInParallel);
 
                    // Console.WriteLine("Final");
 
