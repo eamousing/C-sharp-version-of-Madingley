@@ -257,6 +257,7 @@
     <Compile Include="Output and tracking\OutputGrid.cs" />
     <Compile Include="Output and tracking\OutputModelState.cs" />
     <Compile Include="Output and tracking\PhytoplanktonSizeStructureTracker.cs" />
+    <Compile Include="Output and tracking\PlanktonTracker.cs" />
     <Compile Include="Output and tracking\PredationTracker.cs" />
     <Compile Include="Output and tracking\ProcessTracker.cs" />
     <Compile Include="Output and tracking\ReproductionTracker.cs" />

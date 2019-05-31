@@ -37,13 +37,22 @@ namespace Madingley
         private CreateSDSObject SDSCreator;
 
         /// <summary>
-        /// A streamwriter instance for outputting data on interactions between cohorts
+        /// A streamwriter instance for outputting data on cohorts
         /// </summary>
-        private StreamWriter StateWriter;
+        private StreamWriter CohortStateWriter;
         /// <summary>
-        /// A synchronized version of the streamwriter for outuputting data on the interactions between cohorts
+        /// A synchronized version of the streamwriter for outuputting data on cohorts
         /// </summary>
-        private TextWriter SyncStateWriter;
+        private TextWriter CohortSyncStateWriter;
+
+        /// <summary>
+        /// A streamwriter instance for outputting data on stocks
+        /// </summary>
+        private StreamWriter StockStateWriter;
+        /// <summary>
+        /// A synchronized version of the streamwriter for outuputting data on stocks
+        /// </summary>
+        private TextWriter StockSyncStateWriter;
 
         private int Simulation;
 
@@ -59,12 +68,20 @@ namespace Madingley
             // Initialise the SDS object creator
             SDSCreator = new CreateSDSObject();
 
-            StateWriter = new StreamWriter(_OutputPath + "State" + suffix + simulation.ToString() + ".txt");
+            CohortStateWriter = new StreamWriter(_OutputPath + "CohortState" + suffix + simulation.ToString() + ".txt");
             // Create a threadsafe textwriter to write outputs to the Maturity stream
-            SyncStateWriter = TextWriter.Synchronized(StateWriter);
-            SyncStateWriter.WriteLine("TimeStep\tLatitude\tLongitude\tID" +
+            CohortSyncStateWriter = TextWriter.Synchronized(CohortStateWriter);
+            CohortSyncStateWriter.WriteLine("TimeStep\tLatitude\tLongitude\tID" +
             "\tFunctionalGroup\tJuvenileMass\tAdultMass\tIndividualBodyMass\tCohortAbundance\tBirthTimeStep" +
                 "\tMaturityTimeStep\tLogOptimalPreyBodySizeRatio\tMaximumAchievedBodyMass\tTrophicIndex\tProportionTimeActive");
+
+
+            StockStateWriter = new StreamWriter(_OutputPath + "StockState" + suffix + simulation.ToString() + ".txt");
+            // Create a threadsafe textwriter to write outputs to the Maturity stream
+            StockSyncStateWriter = TextWriter.Synchronized(StockStateWriter);
+            StockSyncStateWriter.WriteLine("TimeStep\tLatitude\tLongitude\tID" +
+            "\tFunctionalGroup\tBin\tBinBottomEdge\tBinTopEdge\tBinCentre\tFractionalArea\tBiomass");
+
 
             Simulation = simulation;
 
@@ -90,18 +107,38 @@ namespace Madingley
 
                 TempStocks = currentModelGrid.GetGridCellStocks(cell[0], cell[1]);
                 TempCohorts = currentModelGrid.GetGridCellCohorts(cell[0], cell[1]);
-
-                foreach (List<Stock> ListS in TempStocks)
+                double [] realm = currentModelGrid.GetCellEnvironment(cell[0], cell[1])["Realm"];
+                if(realm[0] == 1.0)
                 {
-                    foreach (Stock S in ListS)
+                    foreach (List<Stock> ListS in TempStocks)
                     {
-                        organism = "-999\tS" + Convert.ToString(S.FunctionalGroupIndex) + "\t" +
-                                    "-999\t-999\t" + Convert.ToString(S.IndividualBodyMass) + "\t" +
-                                    Convert.ToString(S.TotalBiomass / S.IndividualBodyMass) + "\t" +
-                                    "-999\t-999\t-999\t-999\t-999\t-999";
-                        SyncStateWriter.WriteLine(context + organism);
+                        foreach (Stock S in ListS)
+                        {
+                            organism = "-999\tS" + Convert.ToString(S.FunctionalGroupIndex) + "\t-999\t-999\t-999\t-999\t" + Convert.ToString(S.FractionalArea)
+                                + "\t" + Convert.ToString(S.TotalBiomass);
+                            StockSyncStateWriter.WriteLine(context + organism);
+                        }
                     }
                 }
+                else
+                {
+                    foreach (List<Stock> ListS in TempStocks)
+                    {
+                        foreach (Stock S in ListS)
+                        {
+                            for (int i = 0; i < S.SizeBinCentres.Length; i++)
+			                {
+                                organism = "-999\tS" + Convert.ToString(S.FunctionalGroupIndex) + "\t" + Convert.ToString(i)
+                                    + "\t" + Convert.ToString(S.SizeBinEdges[i])
+                                    + "\t" + Convert.ToString(S.SizeBinEdges[i+1])
+                                    + "\t" + Convert.ToString(S.SizeBinCentres[i])
+                                    + "\t-999\t" + Convert.ToString(S.SizeStructure[i]);
+                                StockSyncStateWriter.WriteLine(context + organism);
+			                }
+                        }
+                    }
+                }
+
 
                 foreach (List<Cohort> ListC in TempCohorts)
                 {
@@ -120,7 +157,7 @@ namespace Madingley
                                     Convert.ToString(C.TrophicIndex) + "\t" +
                                     Convert.ToString(C.ProportionTimeActive);
 
-                        SyncStateWriter.WriteLine(context + organism);
+                        CohortSyncStateWriter.WriteLine(context + organism);
 
                     }
                 }
@@ -313,8 +350,10 @@ namespace Madingley
 
         public void CloseStreams()
         {
-            StateWriter.Close();
-            SyncStateWriter.Close();
+            CohortStateWriter.Close();
+            CohortSyncStateWriter.Close();
+            StockStateWriter.Close();
+            StockSyncStateWriter.Close();
         }
 
 

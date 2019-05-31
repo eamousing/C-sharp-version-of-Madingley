@@ -357,20 +357,30 @@ namespace Madingley
             {
                 //Check if the trait value string is found in the lookup table and if found pull out the index vector for it
                 //and add it to the List of these for processing - intersection of union
-                if (TraitIndexList.TryGetValue(searchTraitValues.ToLower(), out IndexList))
+                //if (TraitIndexList.TryGetValue(searchTraitValues.ToLower(), out IndexList))
+                //{
+                //    ;
+                //}
+                //                //If trait value string not found then show error message
+                //else
+                //{
+                //    IndexList = null;
+                //    Debug.Print("Trait Value to search for not found in lookup tables");
+                //}
+
+                string[] UseKeys = TraitIndexList.Keys.Where( key => key.Contains(searchTraitValues.ToLower())).ToArray();
+                IndexList = TraitIndexList[UseKeys[0]];
+                for (int i = 1; i < UseKeys.Length; i++)
                 {
-                    ;
+                    IndexList = IndexList.Concat(TraitIndexList[UseKeys[i]]).ToArray();
                 }
-                //If trait value string not found then show error message
-                else
-                {
-                    IndexList = null;
-                    Debug.Print("Trait Value to search for not found in lookup tables");
-                }
+
+
             }
             //If trait name string not found then show error message
             else
             {
+                
                 IndexList = null;
                 Debug.Print("Trait to search for not found in lookup tables");
             }

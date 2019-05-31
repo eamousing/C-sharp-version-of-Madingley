@@ -335,7 +335,7 @@ namespace Madingley
             _HerbivoreLogOptimalPreyBodySizeRatio = gridCellCohorts[actingCohort[0]][actingCohort[1]].LogOptimalPreyBodySizeRatio;
             //
             double LogHerbivoreOptimatePreySize = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore);
-            double UpperHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * 1.0);//Math.Exp(_MaxdistanceOptimalPreyPredRatio)
+            double UpperHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * 0.2);//Math.Exp(_MaxdistanceOptimalPreyPredRatio)
             double LowerHerbivorePreySizeWindow = Math.Log10(Math.Exp(_HerbivoreLogOptimalPreyBodySizeRatio) *_BodyMassHerbivore * 0.01);//Math.Exp(-_MaxdistanceOptimalPreyPredRatio)
 
             // Calculate the inidividual herbivory rate per unit autotroph mass-density per hectare

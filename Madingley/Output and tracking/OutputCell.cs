@@ -514,6 +514,11 @@ namespace Madingley
                     int[] ZooplanktonIndices2 = cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex(TempString, TempString2, true);
                     CohortTraitIndicesMarine.Add("Zooplankton (all)", ZooplanktonIndices2.Concat(ZooplanktonIndices1).ToArray());
 
+
+                    TempString = new string[1] { "zooplankton v small it" };
+                    CohortTraitValuesMarine.Add("zooplankton v small it", TempString);
+                    CohortTraitIndicesMarine.Add("zooplankton v small it", cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("group description", "zooplankton v small it", false));
+
                     TempString = new string[1] { "zooplankton small it" };
                     CohortTraitValuesMarine.Add("zooplankton small it", TempString);
                     CohortTraitIndicesMarine.Add("zooplankton small it", cohortFunctionalGroupDefinitions.GetFunctionalGroupIndex("group description", "zooplankton small it", false));

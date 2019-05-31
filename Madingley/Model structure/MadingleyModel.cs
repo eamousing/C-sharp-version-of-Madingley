@@ -1417,16 +1417,16 @@ namespace Madingley
 
 
             //TESTING - Write out the phytoplankton size structure in this cell            
-            string path = initialisation.OutputPath + "/PhytoplanktonSizeStructure_"+ Simulation.ToString() +".csv";
-            using (StreamWriter sw = File.AppendText(path))
-            {
-                string l = CurrentTimeStep.ToString();
-                for (int i = 0; i < workingGridCellStocks[0][0].SizeStructure.Length; i++)
-			    {
-                    l += "," + workingGridCellStocks[0][0].SizeStructure[i].ToString();
-			    }
-                sw.WriteLine(l);
-            }	
+            //string path = initialisation.OutputPath + "/PhytoplanktonSizeStructure_" + Simulation.ToString() + ".csv";
+            //using (StreamWriter sw = File.AppendText(path))
+            //{
+            //    string l = CurrentTimeStep.ToString();
+            //    for (int i = 0; i < workingGridCellStocks[0][0].SizeStructure.Length; i++)
+            //    {
+            //        l += "," + workingGridCellStocks[0][0].SizeStructure[i].ToString();
+            //    }
+            //    sw.WriteLine(l);
+            //}	
 
         }
 
