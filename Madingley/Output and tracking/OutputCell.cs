@@ -101,6 +101,16 @@ namespace Madingley
         private double FishingDeficit;
 
         /// <summary>
+        /// Empirical catch
+        /// </summary>
+        private double ActualObservedCatch;
+
+        /// <summary>
+        /// Modelled catch
+        /// </summary>
+        private double TotalModelCatch;
+
+        /// <summary>
         /// Total densities of all cohorts within each combination of cohort traits
         /// </summary>
         private SortedList<string, double> TotalDensitiesOut = new SortedList<string, double>();
@@ -1142,6 +1152,10 @@ namespace Madingley
             if (marineCell)
             {
                 FishingDeficit = ecosystemModelGrid.GetEnviroLayer("FishingDeficit", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
+                ActualObservedCatch = ecosystemModelGrid.GetEnviroLayer("ActualObservedCatch", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
+                TotalModelCatch = ecosystemModelGrid.GetEnviroLayer("TotalModelCatch", 0, cellIndices[cellIndex][0], cellIndices[cellIndex][1], out varExists);
+
+
             }
 
 
@@ -1229,6 +1243,38 @@ namespace Madingley
                     DataConverter.AddVariable(DataSetToViewLive, "Fishing deficit", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
                     // Add in the initial value
                     DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+
+                    // Add in the small ecto catch
+                    DataConverter.AddVariable(DataSetToViewLive, "Small ecto catch", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(SmallEctoCatch, "Small ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+
+                    // Add in the medium ecto catch
+                    DataConverter.AddVariable(DataSetToViewLive, "Med ecto catch", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(MedEctoCatch, "Med ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+
+                    // Add in the large ecto catch
+                    DataConverter.AddVariable(DataSetToViewLive, "Large ecto catch", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(LgEctoCatch, "Large ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+
+                    // Add in the total model catch
+                    DataConverter.AddVariable(DataSetToViewLive, "Total model catch", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(TotalModelCatch, "Total model catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+
+                    // Add in the fishing deficit
+                    DataConverter.AddVariable(DataSetToViewLive, "Actual observed catch", "tonnes", 1, TimeDimension, ecosystemModelGrid.GlobalMissingValue, TimeSteps);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(ActualObservedCatch , "Actual observed catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, 0);
+
+                    
                 }
                 else
                 {
@@ -1312,6 +1358,18 @@ namespace Madingley
 
                     // Add in the initial value
                     DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(SmallEctoCatch, "Small ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(MedEctoCatch, "Med ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(LgEctoCatch, "Lg ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(CarnivoreCatch, "Carnivore catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(TotalModelCatch, "Total model catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
+                    // Add in the initial value
+                    DataConverter.ValueToSDS1D(ActualObservedCatch, "Actual observed catch", "Time step", ecosystemModelGrid.GlobalMissingValue, BasicOutputMemory, 0);
                 }
                 else
                 {
@@ -1550,7 +1608,13 @@ namespace Madingley
                     }
 
                     DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
-
+                    DataConverter.ValueToSDS1D(SmallEctoCatch, "Small ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    DataConverter.ValueToSDS1D(MedEctoCatch, "Med ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    DataConverter.ValueToSDS1D(LgEctoCatch, "Lg ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    DataConverter.ValueToSDS1D(CarnivoreCatch, "Carnivore catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    DataConverter.ValueToSDS1D(ActualObservedCatch, "Actual observed catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    DataConverter.ValueToSDS1D(TotalModelCatch, "Total model catch", "Time step", ecosystemModelGrid.GlobalMissingValue, DataSetToViewLive, (int)currentTimeStep + 1);
+                    
                 }
                 else
                 {
@@ -1702,6 +1766,27 @@ namespace Madingley
 
                     DataConverter.ValueToSDS1D(FishingDeficit, "Fishing deficit", "Time step", ecosystemModelGrid.GlobalMissingValue,
                         BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(SmallEctoCatch, "Small ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                         BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(MedEctoCatch, "Med ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+                        BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(LgEctoCatch, "Large ecto catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+    BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(CarnivoreCatch, "Carnivore catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+    BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(TotalModelCatch, "Total model catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+    BasicOutputMemory, (int)currentTimeStep + 1);
+
+                    DataConverter.ValueToSDS1D(ActualObservedCatch , "Actual observed catch", "Time step", ecosystemModelGrid.GlobalMissingValue,
+    BasicOutputMemory, (int)currentTimeStep + 1);
+
+
+
                 }
 
 

@@ -125,6 +125,12 @@ namespace Madingley
         private double[,] FrostDays;
         private double[,] Temperature;
         private double[,] ExcessUnmetFishing;
+        private double[,] SmallEctoCatch;
+        private double[,] MedEctoCatch;
+        private double[,] LgEctoCatch;
+        private double[,] CarnivoreCatch;
+        private double[,] ActualObservedCatch;
+        private double[,] TotalModelCatch;
 
         private double[,] FracEvergreen;
         
@@ -281,6 +287,12 @@ namespace Madingley
             HANPP = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             Temperature = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             ExcessUnmetFishing = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            SmallEctoCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            MedEctoCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            LgEctoCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            CarnivoreCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            ActualObservedCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            TotalModelCatch = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
 
             // Temporary outputs for checking plant model
             DataConverter.AddVariable(GridOutput, "Fraction year frost", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
@@ -289,6 +301,13 @@ namespace Madingley
             DataConverter.AddVariable(GridOutput, "HANPP", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "Temperature", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "ExcessUnmetFishing", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "SmallEctoCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "MedEctoCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "LgEctoCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "CarnivoreCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "ActualObservedCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "TotalModelCatch", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+
 
             // Set up outputs for medium or high output levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
@@ -493,7 +512,13 @@ namespace Madingley
             HANPP = ecosystemModelGrid.GetEnviroGrid("HANPP", 0);
             Temperature = ecosystemModelGrid.GetEnviroGrid("Temperature", currentMonth);
             ExcessUnmetFishing = ecosystemModelGrid.GetEnviroGrid("FishingDeficit", 0);
-
+            SmallEctoCatch = ecosystemModelGrid.GetEnviroGrid("SmallEctoCatch", 0);
+            MedEctoCatch = ecosystemModelGrid.GetEnviroGrid("MedEctoCatch", 0);
+            LgEctoCatch = ecosystemModelGrid.GetEnviroGrid("LgEctoCatch", 0);
+            CarnivoreCatch = ecosystemModelGrid.GetEnviroGrid("CarnivoreCatch", 0);
+            ActualObservedCatch = ecosystemModelGrid.GetEnviroGrid("ActualObservedCatch", 0);
+            TotalModelCatch = ecosystemModelGrid.GetEnviroGrid("TotalModelCatch", 0);
+            
             double[] Timings = new double[10];
             
             if ((OutputMetrics))// && (currentTimeStep >= initialisation.TimeStepToStartProcessTrackers))

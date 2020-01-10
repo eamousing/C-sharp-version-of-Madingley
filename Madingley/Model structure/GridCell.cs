@@ -239,6 +239,16 @@ namespace Madingley
             tempVector[0] = 0.0;
             _CellEnvironment.Add("FishingDeficit", tempVector);
 
+            // Add a total model catch to the grid cell
+            tempVector = new double[1];
+            tempVector[0] = 0.0;
+            _CellEnvironment.Add("TotalModelCatch", tempVector);
+
+            // Add a total observed catch to the grid cell
+            tempVector = new double[1];
+            tempVector[0] = 0.0;
+            _CellEnvironment.Add("ActualObservedCatch", tempVector);
+
             // Add the missing value of data in the grid cell to the cell environment
             tempVector = new double[1];
             tempVector[0] = missingValue;
